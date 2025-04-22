@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hexveil - Encryption Suite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(135deg, #010314 0%, #020f2d 100%);
+            color: #00ffee;
+            margin: 0;
+            padding: 0;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        h1, h3 {
+            text-align: center;
+            color: #00ffee;
+            text-shadow: 0 0 8px #00ffee;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 25px;
+            background: rgba(0, 0, 30, 0.8);
+            border-radius: 15px;
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.4);
+            animation: slideUp 0.8s ease-in-out;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #00ffee;
+            border-radius: 8px;
+            background: #011223;
+            color: #00ffee;
+            font-size: 1em;
+        }
+
+        button {
+            background: #00ffee;
+            color: #001f33;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            margin: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease-in-out;
+        }
+
+        button:hover {
+            background: #00ccdd;
+            transform: scale(1.05);
+        }
+
+        .copy-btn {
+            background: #ffaa00;
+            color: #000;
+        }
+
+        .copy-btn:hover {
+            background: #ff9900;
+        }
+
+        .clear-btn {
+            background: #ff3344;
+            color: white;
+        }
+
+        .clear-btn:hover {
+            background: #cc1122;
+        }
+
+        pre {
+            background: #00091a;
+            color: #00ffee;
+            padding: 15px;
+            border-radius: 10px;
+            overflow-x: auto;
+        }
+
+        .tool {
+            margin-top: 30px;
+            border-top: 2px dashed #00ffee;
+            padding-top: 15px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Hexveil</h1>
+        <textarea id="message" rows="4" placeholder="Enter your message or encrypted data"></textarea>
+        <input type="text" id="passphrase" placeholder="Enter passphrase">
+        <button onclick="handleEncrypt()">Encrypt</button>
+        <button onclick="handleDecrypt()">Decrypt</button>
+        <button class="copy-btn" onclick="copyResult()">Copy Result</button>
+        <button class="clear-btn" onclick="clearFields()">Clear Fields</button>
+        <h3>Result:</h3>
+        <pre id="result">N/A</pre>
+        <h3>Message Entropy:</h3>
+        <pre id="entropy-result">Entropy: N/A</pre>
+
+        <div class="tool">
+            <h3>Random Key Generator</h3>
+            <input type="number" id="key-length" placeholder="Enter key length (e.g., 16)">
+            <button onclick="generateRandomKey()">Generate Key</button>
+            <pre id="key-result">Generated Key: N/A</pre>
+        </div>
+
+        <div class="tool">
+            <h3>Base64 Encoder/Decoder</h3>
+            <textarea id="base64-input" rows="4" placeholder="Enter text to encode or decode"></textarea>
+            <button onclick="encodeBase64()">Encode</button>
+            <button onclick="decodeBase64()">Decode</button>
+            <pre id="base64-result">Result: N/A</pre>
+        </div>
+
+        <div class="tool">
+            <h3>Download Encryption History</h3>
+            <button onclick="downloadHistory()">Download History</button>
+        </div>
+    </div>
+
+    <script>
+        let historyLog = [];
+
+        async function hashPassphrase(passphrase) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(passphrase);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(hashBuffer));
+        }
+
+        async function encryptMessage(message, passphrase) {
+            const hashedKey = await hashPassphrase(passphrase);
+            const keyLength = hashedKey.length;
+            return Array.from(message).map((char, i) => {
+                const charCode = char.charCodeAt(0);
+                const keyOffset = hashedKey[i % keyLength];
+                return String.fromCharCode((charCode + keyOffset) % 256);
+            }).join('');
+        }
+
+        async function decryptMessage(encryptedMessage, passphrase) {
+            const hashedKey = await hashPassphrase(passphrase);
+            const keyLength = hashedKey.length;
+            return Array.from(encryptedMessage).map((char, i) => {
+                const charCode = char.charCodeAt(0);
+                const keyOffset = hashedKey[i % keyLength];
+                return String.fromCharCode((charCode - keyOffset + 256) % 256);
+            }).join('');
+        }
+
+        async function handleEncrypt() {
+            const message = document.getElementById('message').value;
+            const passphrase = document.getElementById('passphrase').value;
+            if (message && passphrase) {
+                const encrypted = await encryptMessage(message, passphrase);
+                document.getElementById('result').textContent = encrypted;
+                calculateEntropy(message);
+                historyLog.push(`Encrypted: ${encrypted}`);
+            } else {
+                alert('Please fill out both fields!');
+            }
+        }
+
+        async function handleDecrypt() {
+            const encryptedMessage = document.getElementById('message').value;
+            const passphrase = document.getElementById('passphrase').value;
+            if (encryptedMessage && passphrase) {
+                const decrypted = await decryptMessage(encryptedMessage, passphrase);
+                document.getElementById('result').textContent = decrypted;
+                calculateEntropy(decrypted);
+                historyLog.push(`Decrypted: ${decrypted}`);
+            } else {
+                alert('Please fill out both fields!');
+            }
+        }
+
+        function copyResult() {
+            const result = document.getElementById('result').textContent;
+            navigator.clipboard.writeText(result);
+            alert('Result copied to clipboard!');
+        }
+
+        function clearFields() {
+            document.getElementById('message').value = '';
+            document.getElementById('passphrase').value = '';
+            document.getElementById('result').textContent = 'N/A';
+            document.getElementById('entropy-result').textContent = 'Entropy: N/A';
+        }
+
+        function generateRandomKey() {
+            const keyLength = document.getElementById('key-length').value;
+            if (keyLength && keyLength > 0) {
+                const randomKey = Array.from({ length: keyLength }, () =>
+                    String.fromCharCode(Math.floor(Math.random() * (126 - 33) + 33))
+                ).join('');
+                document.getElementById('key-result').textContent = `Generated Key: ${randomKey}`;
+            } else {
+                alert('Please enter a valid key length!');
+            }
+        }
+
+        function encodeBase64() {
+            const input = document.getElementById('base64-input').value;
+            const encoded = btoa(input);
+            document.getElementById('base64-result').textContent = `Encoded: ${encoded}`;
+        }
+
+        function decodeBase64() {
+            try {
+                const input = document.getElementById('base64-input').value;
+                const decoded = atob(input);
+                document.getElementById('base64-result').textContent = `Decoded: ${decoded}`;
+            } catch {
+                alert('Invalid Base64 string!');
+            }
+        }
+
+        function calculateEntropy(message) {
+            const entropy = Array.from(message).reduce((acc, char) => {
+                acc[char] = (acc[char] || 0) + 1;
+                return acc;
+            }, {});
+            const entropyValue = Object.values(entropy).reduce((sum, freq) => {
+                const p = freq / message.length;
+                return sum - p * Math.log2(p);
+            }, 0);
+            document.getElementById('entropy-result').textContent = `Entropy: ${entropyValue.toFixed(4)}`;
+        }
+
+        function downloadHistory() {
+            const blob = new Blob([historyLog.join('\n')], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'history.txt';
+            link.click();
+        }
+    </script>
+    <footer class="custom-footer">
+        <p>&copy; Hexveil is Archovia’s most basic cryptography tool. It uses a custom algorithm developed by Archovia and is available for download.</p>
+        <a href="books/Hexveil.txt" download>Download</a></footer>
+</body>
+</html>

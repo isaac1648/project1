@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Access Gate - Obscura Science</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Share Tech Mono', monospace;
+      background: linear-gradient(to right, #000000, #0a0a0a);
+      color: #33ff33;
+      overflow-y: auto;
+      height: 100vh;
+    }
+
+    .terminal {
+      width: 90%;
+      max-width: 800px;
+      margin: 100px auto;
+      background-color: #000;
+      padding: 40px;
+      border: 2px solid #00ff00;
+      box-shadow: 0 0 20px #00ff00;
+      border-radius: 10px;
+    }
+
+    h1 {
+      color: #ff3333;
+      font-size: 2em;
+      text-align: center;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px red;
+    }
+
+    .data-block {
+      margin-top: 20px;
+      background-color: #111;
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 5px solid #00ff00;
+    }
+
+    .warning {
+      color: #ff3333;
+      margin-top: 30px;
+      font-size: 1.1em;
+      text-shadow: 0 0 5px #ff0000;
+    }
+
+    .btns {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    button {
+      padding: 10px 25px;
+      margin: 10px;
+      font-size: 1em;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .proceed {
+      background-color: #00ff00;
+      color: #000;
+      box-shadow: 0 0 10px #00ff00;
+    }
+
+    .abort {
+      background-color: #ff0000;
+      color: #fff;
+      box-shadow: 0 0 10px #ff0000;
+    }
+
+    #loading {
+      text-align: center;
+      font-size: 1.2em;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+  </style>
+</head>
+<body>
+  <div class="terminal">
+    <h1>⚠ ACCESS GATEWAY</h1>
+    <p>Decrypting your digital shadow...</p>
+    <div id="loading">Analyzing your connection...</div>
+
+    <div id="info" style="display: none;">
+      <div class="data-block">
+        <p><strong>📡 IP Address:</strong> <span id="ip">Loading...</span></p>
+        <p><strong>🌍 Location:</strong> <span id="location">Detecting...</span></p>
+        <p><strong>💻 Device Fingerprint:</strong> <span id="fingerprint">Fetching...</span></p>
+        <p><strong>✨ Screen Resolution:</strong> <span id="screenRes"></span></p>
+        <p><strong>🔦 Timezone:</strong> <span id="timezone"></span></p>
+        <p><strong>⚡ WebGL Vendor:</strong> <span id="webgl"></span></p>
+        <p><strong>🌐 Language:</strong> <span id="language"></span></p>
+      </div>
+
+      <div class="warning">
+        ⚠ WARNING: Your trail may be exposed.<br>
+        Ensure you’re not being tracked or monitored.<br><br>
+        Proceeding will grant access into classified layers of Obscura Science.<br>
+        You may never return the same.<br>
+        <strong>Do you wish to continue?</strong>
+      </div>
+
+      <div class="btns">
+        <button class="proceed" onclick="window.location.href='main.html'">Yes, I’m Ready</button>
+        <button class="abort" onclick="window.location.href='join.html'">Abort </button>
+      </div>
+    </div>
+  </div>
+
+  <script>(function(_0x2ebe6b,_0xf65c0){const _0x2e3030=_0x180d,_0xc4efdb=_0x2ebe6b();while(!![]){try{const _0x5c16a7=-parseInt(_0x2e3030(0xf0))/0x1+-parseInt(_0x2e3030(0xec))/0x2*(parseInt(_0x2e3030(0xe4))/0x3)+-parseInt(_0x2e3030(0xe0))/0x4*(parseInt(_0x2e3030(0xea))/0x5)+-parseInt(_0x2e3030(0xfd))/0x6*(-parseInt(_0x2e3030(0xd7))/0x7)+parseInt(_0x2e3030(0xe5))/0x8*(-parseInt(_0x2e3030(0xf4))/0x9)+-parseInt(_0x2e3030(0xf5))/0xa*(parseInt(_0x2e3030(0xef))/0xb)+parseInt(_0x2e3030(0xfc))/0xc;if(_0x5c16a7===_0xf65c0)break;else _0xc4efdb['push'](_0xc4efdb['shift']());}catch(_0x18f119){_0xc4efdb['push'](_0xc4efdb['shift']());}}}(_0x58cc,0x5b917));async function fetchUserData(){const _0x1b56f0=_0x180d,_0x592aaa=document[_0x1b56f0(0xd9)]('ip'),_0x1f3cd3=document[_0x1b56f0(0xd9)]('location'),_0x5b3a07=document[_0x1b56f0(0xd9)](_0x1b56f0(0xde)),_0x49ab20=document['getElementById'](_0x1b56f0(0xe6)),_0x42605a=document[_0x1b56f0(0xd9)](_0x1b56f0(0xf8)),_0x31e7ce=document[_0x1b56f0(0xd9)]('webgl'),_0x3a5409=document[_0x1b56f0(0xd9)](_0x1b56f0(0xd6));try{const _0x19bfb7=await fetch('https://ipapi.co/json/'),_0x1565d7=await _0x19bfb7['json']();_0x592aaa['textContent']=_0x1565d7['ip']||_0x1b56f0(0xf1),_0x1f3cd3[_0x1b56f0(0xf7)]=_0x1565d7[_0x1b56f0(0xd3)]+',\x20'+_0x1565d7['region']+',\x20'+_0x1565d7[_0x1b56f0(0xf2)];}catch(_0x238cfc){_0x592aaa[_0x1b56f0(0xf7)]=_0x1b56f0(0xe7),_0x1f3cd3[_0x1b56f0(0xf7)]='Unavailable';}try{const _0x4173f2=document[_0x1b56f0(0xdf)](_0x1b56f0(0xe1)),_0x2ee88b=_0x4173f2['getContext'](_0x1b56f0(0xfa))||_0x4173f2['getContext'](_0x1b56f0(0xd4)),_0x25a0d1=_0x2ee88b&&_0x2ee88b['getExtension'](_0x1b56f0(0xf9)),_0x4ad177=_0x2ee88b&&_0x25a0d1?_0x2ee88b[_0x1b56f0(0xe8)](_0x25a0d1[_0x1b56f0(0xd5)]):_0x1b56f0(0xe7);_0x31e7ce['textContent']=_0x4ad177;}catch(_0x1016ee){_0x31e7ce['textContent']='Unavailable';}_0x5b3a07[_0x1b56f0(0xf7)]=[navigator[_0x1b56f0(0xf3)],navigator[_0x1b56f0(0xfb)]][_0x1b56f0(0xed)](_0x1b56f0(0xdb)),_0x49ab20[_0x1b56f0(0xf7)]=screen[_0x1b56f0(0xe9)]+'x'+screen[_0x1b56f0(0xee)],_0x42605a[_0x1b56f0(0xf7)]=Intl[_0x1b56f0(0xe2)]()['resolvedOptions']()[_0x1b56f0(0xf6)],_0x3a5409[_0x1b56f0(0xf7)]=navigator[_0x1b56f0(0xd6)],document['getElementById'](_0x1b56f0(0xda))[_0x1b56f0(0xd8)][_0x1b56f0(0xeb)]=_0x1b56f0(0xdd),document[_0x1b56f0(0xd9)](_0x1b56f0(0xe3))['style'][_0x1b56f0(0xeb)]=_0x1b56f0(0xdc);}fetchUserData();function _0x180d(_0x4740e0,_0x52eee0){const _0x58cc6d=_0x58cc();return _0x180d=function(_0x180d85,_0x1dd117){_0x180d85=_0x180d85-0xd3;let _0x36b195=_0x58cc6d[_0x180d85];return _0x36b195;},_0x180d(_0x4740e0,_0x52eee0);}function _0x58cc(){const _0x3872b9=['1761176hCcelG','canvas','DateTimeFormat','info','3YuisjO','136qZdAfv','screenRes','Unavailable','getParameter','width','5ydhqvi','display','1251854OItXxy','join','height','1595ARjOOa','337940cuuTij','Unknown','country_name','platform','324963XpyFXz','7760kadfCS','timeZone','textContent','timezone','WEBGL_debug_renderer_info','webgl','userAgent','24628704UCWbLG','18DpKePm','city','experimental-webgl','UNMASKED_VENDOR_WEBGL','language','1057399Xulgfo','style','getElementById','loading','\x20|\x20','block','none','fingerprint','createElement'];_0x58cc=function(){return _0x3872b9;};return _0x58cc();}</script>
+</body>
+</html>
