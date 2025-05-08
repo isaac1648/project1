@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Archnova - Coming Soon</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    .message {
+      text-align: center;
+      font-size: 2rem;
+      line-height: 1.6;
+      animation: fadeIn 2s ease-in-out, glow 2s infinite alternate;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes glow {
+      from { text-shadow: 0 0 10px #00ffe7, 0 0 20px #00ffe7; }
+      to { text-shadow: 0 0 20px #00ffe7, 0 0 40px #00ffe7; }
+    }
+  </style>
+</head>
+<body>
+  <div class="message">
+    <p>⚠️ Sorry, Archnova is currently under development.</p>
+    <p>It will be live soon. Stay tuned!</p>
+  </div>
+</body>
+</html>

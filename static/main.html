@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Archovia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    :root {
+      --primary: #45f3ff;
+      --secondary: #6600cc;
+      --accent: #cc66ff;
+      --bg-dark: #0a0d0f;
+      --bg-darker: #070a0c;
+      --text-light: #d5dee3;
+      --text-lighter: #e3f6f5;
+      --panel-bg: rgba(10, 13, 15, 0.85);
+      --panel-border: #1f272e;
+    }
+
+    body {
+      font-family: 'Share Tech Mono', monospace;
+      background: #000;
+      color: var(--text-light);
+      line-height: 1.6;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('cosmic.png') no-repeat center center fixed;
+      background-size: cover;
+      filter: brightness(2.5) contrast(1.2);
+      z-index: -2;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(0,0,0,0.92) 0%, rgba(10,13,20,0.85) 100%);
+      backdrop-filter: blur(4px);
+      z-index: -1;
+    }
+
+    /* Glitch effect for heading elements */
+    .glitch {
+      position: relative;
+      animation: glitch 5s infinite;
+    }
+
+    @keyframes glitch {
+      0% { text-shadow: 0.05em 0 0 rgba(255,0,0,0.75), -0.05em -0.025em 0 rgba(0,255,0,0.75), 0.025em 0.05em 0 rgba(0,0,255,0.75); }
+      14% { text-shadow: 0.05em 0 0 rgba(255,0,0,0.75), -0.05em -0.025em 0 rgba(0,255,0,0.75), 0.025em 0.05em 0 rgba(0,0,255,0.75); }
+      15% { text-shadow: -0.05em -0.025em 0 rgba(255,0,0,0.75), 0.025em 0.025em 0 rgba(0,255,0,0.75), -0.05em -0.05em 0 rgba(0,0,255,0.75); }
+      49% { text-shadow: -0.05em -0.025em 0 rgba(255,0,0,0.75), 0.025em 0.025em 0 rgba(0,255,0,0.75), -0.05em -0.05em 0 rgba(0,0,255,0.75); }
+      50% { text-shadow: 0.025em 0.05em 0 rgba(255,0,0,0.75), 0.05em 0 0 rgba(0,255,0,0.75), 0 -0.05em 0 rgba(0,0,255,0.75); }
+      99% { text-shadow: 0.025em 0.05em 0 rgba(255,0,0,0.75), 0.05em 0 0 rgba(0,255,0,0.75), 0 -0.05em 0 rgba(0,0,255,0.75); }
+      100% { text-shadow: -0.025em 0 0 rgba(255,0,0,0.75), -0.025em -0.025em 0 rgba(0,255,0,0.75), -0.025em -0.05em 0 rgba(0,0,255,0.75); }
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: rgba(10, 13, 15, 0.9);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: #27d3df;
+    }
+
+    /* Header with parallax effect */
+    header {
+      background: linear-gradient(180deg, rgba(5,8,12,0.95) 0%, rgba(10,13,15,0.9) 100%);
+      padding: 25px 50px;
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 1000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.4s ease;
+      border-bottom: 1px solid rgba(69, 243, 255, 0.2);
+      box-shadow: 0 5px 25px rgba(0,0,0,0.5);
+    }
+
+    header.scrolled {
+      padding: 15px 50px;
+      background: rgba(5,8,12,0.98);
+      backdrop-filter: blur(10px);
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-shadow: 0 0 10px rgba(69, 243, 255, 0.6);
+      letter-spacing: 3px;
+      transition: all 0.5s ease;
+    }
+
+    .logo:hover {
+      text-shadow: 0 0 15px var(--primary), 0 0 25px var(--primary);
+      transform: scale(1.05);
+    }
+
+    .symbol {
+      width: 60px;
+      height: 60px;
+      filter: drop-shadow(0 0 5px var(--primary));
+      transition: transform 0.5s ease, filter 0.5s ease;
+    }
+
+    .symbol:hover {
+      transform: scale(1.1) rotate(5deg);
+      filter: drop-shadow(0 0 8px var(--primary)) brightness(1.2);
+    }
+
+    /* Modern sticky navigation */
+    nav {
+      background: rgba(9, 13, 16, 0.9);
+      backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 0;
+      position: fixed;
+      top: 100px;
+      width: 100%;
+      z-index: 999;
+      transition: all 0.4s ease;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    }
+
+    nav.scrolled {
+      top: 70px;
+    }
+
+    nav ul {
+      display: flex;
+      justify-content: center;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    nav a {
+      color: var(--text-light);
+      text-decoration: none;
+      padding: 20px 25px;
+      font-weight: 500;
+      font-size: 1.05rem;
+      letter-spacing: 1px;
+      position: relative;
+      transition: all 0.3s ease;
+      display: inline-block;
+    }
+
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: 15px;
+      left: 50%;
+      width: 0;
+      height: 2px;
+      background: var(--primary);
+      transition: all 0.3s ease;
+      transform: translateX(-50%);
+      opacity: 0;
+    }
+
+    nav a:hover {
+      color: var(--primary);
+    }
+
+    nav a:hover::after {
+      width: 50%;
+      opacity: 1;
+    }
+
+    /* Enhanced hero section with particle effect */
+    .hero {
+      padding-top: 220px;
+      padding-bottom: 120px;
+      position: relative;
+      text-align: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero h2 {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 40px;
+      border-left: 5px solid var(--primary);
+      border-right: 5px solid var(--primary);
+      font-size: 2.4rem;
+      max-width: 900px;
+      margin: auto;
+      color: var(--text-lighter);
+      box-shadow: 0 5px 25px rgba(0,0,0,0.3);
+      position: relative;
+      z-index: 2;
+      line-height: 1.4;
+      animation: fadeInUp 1s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    #particles-js {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+
+    /* Improved section styling */
+    section {
+      padding: 100px 50px;
+      position: relative;
+    }
+
+    .content-section {
+      background: linear-gradient(180deg, rgba(10,13,15,0.9) 0%, rgba(12,16,19,0.9) 100%);
+      margin: 40px 0;
+      border-top: 1px solid rgba(69, 243, 255, 0.2);
+      border-bottom: 1px solid rgba(69, 243, 255, 0.2);
+      position: relative;
+    }
+
+    .content-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPgogIDxkZWZzPgogICAgPHBhdHRlcm4gaWQ9InBhdHRlcm4iIHg9IjAiIHk9IjAiIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgcGF0dGVyblRyYW5zZm9ybT0icm90YXRlKDQ1KSI+CiAgICAgIDxsaW5lIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxMCIgc3Ryb2tlPSJyZ2JhKDY5LCAyNDMsIDI1NSwgMC4wNikiIHN0cm9rZS13aWR0aD0iMSIvPgogICAgICA8bGluZSB4MT0iNSIgeTE9IjAiIHgyPSI1IiB5Mj0iMTAiIHN0cm9rZT0icmdiYSg2OSwgMjQzLCAyNTUsIDAuMDQpIiBzdHJva2Utd2lkdGg9IjEiLz4KICAgIDwvcGF0dGVybj4KICA8L2RlZnM+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNwYXR0ZXJuKSIgLz4KPC9zdmc+') repeat;
+      opacity: 0.5;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .content-section h3 {
+      font-size: 2.6rem;
+      margin-bottom: 35px;
+      color: var(--primary);
+      text-align: center;
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 3px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .content-section h3::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 3px;
+      background: var(--primary);
+      box-shadow: 0 0 10px var(--primary);
+    }
+
+    .content-section p {
+      max-width: 900px;
+      margin: 0 auto 45px;
+      font-size: 1.2rem;
+      line-height: 2;
+      color: var(--text-light);
+      position: relative;
+      z-index: 1;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+    }
+
+    /* Enhanced members grid */
+    #members-grid {
+      background: linear-gradient(135deg, rgba(10, 15, 20, 0.9) 0%, rgba(15, 20, 30, 0.9) 100%);
+      border-radius: 20px;
+      margin: 60px auto;
+      padding: 50px;
+      max-width: 1200px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4), 0 0 20px rgba(69, 243, 255, 0.1);
+      border: 1px solid rgba(69, 243, 255, 0.1);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      margin-top: 30px;
+    }
+
+    .grid-item {
+      background: rgba(20, 25, 30, 0.7);
+      border-radius: 15px;
+      padding: 30px 20px;
+      color: var(--primary);
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      position: relative;
+      overflow: hidden;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .grid-item::before {
+      content: '';
+      position: absolute;
+      top: -100%;
+      left: -100%;
+      width: 50%;
+      height: 50%;
+      background: linear-gradient(135deg, transparent, rgba(69, 243, 255, 0.1), transparent);
+      transition: all 0.6s ease;
+      transform: rotate(45deg);
+    }
+
+    .grid-item:hover::before {
+      top: 100%;
+      left: 100%;
+    }
+
+    .grid-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 25px rgba(0,0,0,0.3);
+      background: rgba(25, 30, 35, 0.8);
+      border: 1px solid rgba(69, 243, 255, 0.2);
+    }
+
+    .grid-item.name {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #d3d3d3;
+      margin-bottom: 10px;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    /* Enhanced infinity animation */
+    .infinity-illusion {
+      width: 100%;
+      max-width: 800px;
+      margin: 70px auto;
+      background: linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(10,15,20,0.9) 100%);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.5), 0 0 25px rgba(69, 243, 255, 0.2);
+      border: 1px solid rgba(69, 243, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .infinity-illusion::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPgogIDxkZWZzPgogICAgPHBhdHRlcm4gaWQ9InBhdHRlcm4iIHg9IjAiIHk9IjAiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CiAgICAgIDxjaXJjbGUgY3g9IjEiIGN5PSIxIiByPSIxIiBmaWxsPSJyZ2JhKDY5LCAyNDMsIDI1NSwgMC4xKSIgLz4KICAgIDwvcGF0dGVybj4KICA8L2RlZnM+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNwYXR0ZXJuKSIgLz4KPC9zdmc+') repeat;
+      opacity: 0.3;
+      z-index: 0;
+    }
+
+    .infinity-svg {
+      width: 100%;
+      height: 250px;
+      filter: drop-shadow(0 0 8px rgba(69, 243, 255, 0.5));
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Improved link sections */
+    .links {
+      text-align: center;
+      padding: 80px 50px;
+      position: relative;
+      background: linear-gradient(180deg, rgba(10, 13, 15, 0.9) 0%, rgba(12, 15, 18, 0.9) 100%);
+      border-top: 1px solid rgba(69, 243, 255, 0.15);
+      border-bottom: 1px solid rgba(69, 243, 255, 0.15);
+    }
+
+    .links h3 {
+      font-size: 2.6rem;
+      margin-bottom: 50px;
+      color: var(--primary);
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 3px;
+      position: relative;
+      display: inline-block;
+    }
+
+    .links h3::after {
+      content: '';
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 3px;
+      background: var(--primary);
+      box-shadow: 0 0 10px var(--primary);
+    }
+
+    .link-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+      padding: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .links a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-light);
+      border: 1px solid rgba(42, 55, 69, 0.5);
+      padding: 20px;
+      text-decoration: none;
+      border-radius: 15px;
+      background: linear-gradient(135deg, rgba(18, 26, 36, 0.9) 0%, rgba(15, 20, 30, 0.9) 100%);
+      transition: all 0.3s ease;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      font-size: 1.1rem;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      z-index: 1;
+    }
+
+    .links a::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(69, 243, 255, 0.15) 0%, rgba(69, 243, 255, 0) 100%);
+      z-index: -1;
+      transform: translateY(100%);
+      transition: transform 0.5s ease;
+    }
+
+    .links a:hover {
+      color: var(--primary);
+      border-color: var(--primary);
+      transform: translateY(-5px);
+      box-shadow: 0 15px 25px rgba(0,0,0,0.3), 0 0 15px rgba(69, 243, 255, 0.2);
+    }
+
+    .links a:hover::before {
+      transform: translateY(0);
+    }
+
+    /* Enhanced Onion Links section */
+    .library-section {
+      background: linear-gradient(180deg, #0d0d0d 0%, #0a0a0a 100%);
+      padding: 80px 20px;
+      border-top: 2px solid var(--secondary);
+      border-bottom: 2px solid var(--secondary);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .library-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPgogIDxkZWZzPgogICAgPHBhdHRlcm4gaWQ9InBhdHRlcm4iIHg9IjAiIHk9IjAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgcGF0dGVyblRyYW5zZm9ybT0icm90YXRlKDQ1KSI+CiAgICAgIDxsaW5lIHgxPSIwIiB5MT0iMCIgeDI9IjQwIiB5Mj0iNDAiIHN0cm9rZT0icmdiYSgxMDIsIDAsIDIwNCwgMC4wNikiIHN0cm9rZS13aWR0aD0iMSIvPgogICAgPC9wYXR0ZXJuPgogIDwvZGVmcz4KICA8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI3BhdHRlcm4pIiAvPgo8L3N2Zz4=') repeat;
+      opacity: 0.5;
+      z-index: 0;
+    }
+
+    .library-section h3 {
+      color: var(--accent);
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 2.6rem;
+      letter-spacing: 3px;
+      font-family: 'Orbitron', sans-serif;
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 0 10px rgba(204, 102, 255, 0.5);
+    }
+
+    .library-section h3::after {
+      content: '';
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 3px;
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    .library-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 25px;
+      max-width: 1400px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .library-grid a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, rgba(26, 26, 26, 0.95) 0%, rgba(20, 20, 20, 0.95) 100%);
+      padding: 25px 20px;
+      border: 1px solid var(--secondary);
+      border-radius: 15px;
+      text-align: center;
+      color: var(--accent);
+      text-decoration: none;
+      transition: all 0.4s ease;
+      font-weight: bold;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+      height: 100%;
+      font-size: 1.1rem;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .library-grid a::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(204, 102, 255, 0.2), transparent);
+      transition: left 0.7s ease;
+      z-index: -1;
+    }
+
+    .library-grid a:hover {
+      background-color: #2d0033;
+      color: #ffffff;
+      transform: translateY(-7px) scale(1.03);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.4), 0 0 20px rgba(153, 0, 255, 0.3);
+      border-color: var(--accent);
+    }
+
+    .library-grid a:hover::before {
+      left: 100%;
+    }
+
+    .library-section h4 {
+      margin-top: 40px;
+      color: #cc66ff;
+      text-align: center;
+      font-size: 1.2rem;
+      letter-spacing: 2px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Enhanced Archovia Services */
+    .archovi {
+      padding: 80px 50px;
+      background: linear-gradient(180deg, rgba(10, 13, 15, 0.9) 0%, rgba(8, 10, 12, 0.9) 100%);
+      text-align: center;
+      position: relative;
+      border-top: 1px solid rgba(69, 243, 255, 0.15);
+      border-bottom: 1px solid rgba(69, 243, 255, 0.15);
+    }
+
+    .archovi h2 {
+      font-size: 2.6rem;
+      margin-bottom: 40px;
+      color: var(--primary);
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 3px;
+      position: relative;
+      display: inline-block;
+    }
+
+    .archovi h2::after {
+      content: '';
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 3px;
+      background: var(--primary);
+      box-shadow: 0 0 10px var(--primary);
+    }
+
+    .archoviab-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 30px auto 0;
+    }
+
+    .archoviab-grid a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-light);
+      border: 1px solid rgba(42, 55, 69, 0.7);
+      padding: 25px 20px;
+      text-decoration: none;
+      border-radius: 15px;
+      background: linear-gradient(135deg, rgba(18, 26, 36, 0.9) 0%, rgba(15, 20, 30, 0.9) 100%);
+      transition: all 0.4s ease;
+      height: 100%;
+      font-size: 1.2rem;
+      position: relative;
+      
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      z-index: 1;
+   
+      font-weight: bold;}
+
+    .archoviab-grid a::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, transparent, rgba(69, 243, 255, 0.1), transparent);
+      z-index: -1;
+      transform: translateX(-100%);
+      transition: transform 0.6s ease;
+    }
+
+    .archoviab-grid a:hover {
+      background: linear-gradient(135deg, rgba(69, 243, 255, 0.2) 0%, rgba(69, 243, 255, 0.05) 100%);
+      color: #ffffff;
+      border-color: var(--primary);
+      border-radius: 30px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.3), 0 0 20px rgba(69, 243, 255, 0.2);
+      transform: translateY(-7px);
+      letter-spacing: 1px;
+    }
+
+    .archoviab-grid a:hover::before {
+      transform: translateX(100%);
+    }
+
+    /* Enhanced Books section */
+    .books {
+      padding: 80px 50px;
+      text-align: center;
+      background: linear-gradient(180deg, rgba(10, 15, 20, 0.9) 0%, rgba(12, 17, 22, 0.9) 100%);
+      position: relative;
+    }
+
+    .books::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPgogIDxkZWZzPgogICAgPHBhdHRlcm4gaWQ9InBhdHRlcm4iIHg9IjAiIHk9IjAiIHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CiAgICAgIDxjaXJjbGUgY3g9IjQwIiBjeT0iNDAiIHI9IjEiIGZpbGw9InJnYmEoNjksIDI0MywgMjU1LCAwLjEpIiAvPgogICAgPC9wYXR0ZXJuPgogIDwvZGVmcz4KICA8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI3BhdHRlcm4pIiAvPgo8L3N2Zz4=') repeat;
+      opacity: 0.3;
+      z-index: 0;
+    }
+
+    .books h3 {
+      font-size: 2.6rem;
+      margin-bottom: 40px;
+      color: var(--primary);
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 3px;
+      position: relative;
+      z-index: 1;
+      display: inline-block;
+    }
+
+    .books h3::after {
+      content: '';
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 3px;
+      background: var(--primary);
+      box-shadow: 0 0 10px var(--primary);
+    }
+
+    .books ul {
+      list-style: none;
+      padding: 0;
+      max-width: 800px;
+      margin: 40px auto 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .books li {
+      margin: 20px 0;
+      font-size: 1.15rem;
+      position: relative;
+      padding: 15px 20px;
+      background: rgba(18, 26, 36, 0.7);
+      border-radius: 10px;
+      border: 1px solid rgba(69, 243, 255, 0.1);
+      transition: all 0.3s ease;
+      display: block;
+    }
+
+    .books li:hover {
+      background: rgba(25, 35, 45, 0.8);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2), 0 0 15px rgba(69, 243, 255, 0.1);
+    }
+
+    .books li a {
+      color: #9de5fa;
+      text-decoration: none;
+      display: block;
+      transition: all 0.3s ease;
+      position: relative;
+      padding-left: 30px;
+    }
+
+    .books li a::before {
+      content: '\f02d';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      position: absolute;
+      left: 0;
+      color: var(--primary);
+    }
+
+    .books li a:hover {
+      color: var(--primary);
+      letter-spacing: 1px;
+    }
+
+    /* Enhanced Contact section */
+    .content-section#contact {
+      background: linear-gradient(135deg, rgba(10, 13, 15, 0.9) 0%, rgba(15, 20, 25, 0.9) 100%);
+      text-align: center;
+    }
+
+    .contact-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 40px;
+      flex-wrap: wrap;
+    }
+
+    .contact-buttons a {
+      padding: 18px 35px;
+      background: linear-gradient(135deg, rgba(69, 243, 255, 0.9) 0%, rgba(69, 243, 255, 0.7) 100%);
+      color: #000;
+      font-weight: bold;
+      border-radius: 30px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+
+    .contact-buttons a::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      transition: left 0.7s ease;
+      z-index: -1;
+    }
+
+    .contact-buttons a:hover {
+      background: linear-gradient(135deg, rgba(27, 212, 226, 1) 0%, rgba(27, 212, 226, 0.8) 100%);
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.4), 0 0 15px rgba(69, 243, 255, 0.3);
+    }
+
+    .contact-buttons a:hover::before {
+      left: 100%;
+    }
+
+    /* Enhanced footer */
+    footer {
+      text-align: center;
+      padding: 40px 20px;
+      background: linear-gradient(180deg, #090c10 0%, #06090d 100%);
+      font-size: 1.05rem;
+      color: #697882;
+      border-top: 1px solid #1f292f;
+      position: relative;
+    }
+
+    footer::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(90deg, transparent, var(--primary), transparent);
+      opacity: 0.3;
+    }
+
+    /* Hidden wisdom section styling */
+    #hidden-wisdom {
+      background: linear-gradient(135deg, rgba(10, 13, 15, 0.9) 0%, rgba(12, 16, 21, 0.9) 100%);
+      padding: 100px 50px;
+    }
+
+    #hidden-wisdom ul {
+      max-width: 900px;
+      margin: 30px auto;
+      list-style: none;
+      padding: 0;
+    }
+
+    #hidden-wisdom li {
+      margin: 25px 0;
+      padding: 20px;
+      background: rgba(18, 26, 36, 0.7);
+      border-radius: 10px;
+      border-left: 4px solid var(--primary);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+    }
+
+    #hidden-wisdom li:hover {
+      transform: translateX(5px);
+      background: rgba(22, 30, 40, 0.8);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+
+    #hidden-wisdom strong {
+      color: var(--primary);
+      font-size: 1.1rem;
+    }
+
+    #hidden-wisdom blockquote {
+      font-style: italic;
+      font-weight: bold;
+      color: #ccc;
+      border-left: 4px solid #888;
+      padding: 20px 30px;
+      margin: 30px auto;
+      background: rgba(0,0,0,0.3);
+      border-radius: 10px;
+      max-width: 800px;
+      position: relative;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    #hidden-wisdom blockquote::before {
+      content: '\f10d';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      position: absolute;
+      left: 10px;
+      top: 10px;
+      color: #888;
+      font-size: 1.5rem;
+    }
+
+    /* Neo-cyber glow effects */
+    .neo-glow {
+      text-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary);
+      animation: pulse 4s infinite alternate;
+    }
+
+    @keyframes pulse {
+      0% { text-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary); }
+      100% { text-shadow: 0 0 15px var(--primary), 0 0 30px var(--primary), 0 0 40px var(--primary); }
+    }
+
+    /* Add some animations */
+    .fade-in {
+      animation: fadeIn 1.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .slide-in {
+      animation: slideIn 1s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Digital noise overlay */
+    .noise-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAtlSURBVGhD7ZpprF1FFYbPvbdAW2opYGspWIpQQBCKgEBCGRIhDEUlQhCNxkQlKAYBCSGEIcaAIQwhYPxhSFAJ+gOiAiqggBAGQeYylTK0UBCopUBLC7Tj84299uKcffa5516C0cSVrOx99tlnr/Wtb33rW2vve2TYsGHqS/p/k0o/9yn9P8igQYPUSy+9pBNOOEEnnniixo4dqwkTJuiZZ57RO++8oyeeeCLdf//9euSRR/TOO+/os88+K1/+6aT33ntPJ598svbcc08NHz5cX3zxhV566SUtWLBA11xzjVatWpUOrlu3Tj/60Y/05ptvlnf/FbLvvvvqvPPO0w033KAhQ4Zo+PDhGc7LLrtMy5cv1wMPPKBDDz1UxxxzjK6//notXLhQP/zhD7V06VLdd999OvDAA7Vp0yYdeOCBWrFihV5//XUdc8wxWrt2rX73u99p5cqVeuutt/T222/r448/Lk/5AuTggw/WRRddpP3220/HHXecVq9enRUfNmyYZsyYoUmTJmnu3Ll67bXXdMQRR+jpp59OhR988MG6++67dfjhh2eYTZo0Sbvttpvmz5+foXXWWWfp0Ucf1bPPPqvnnnsu1/iX5JhjjtHPf/5zrVmzJvsbMWKEDjroIF144YU699xzU1E2AEWnTp2qI444QmeccYaeeOIJffe739XkyZP1wgsv6Oijj9ZVV12lTz/9VJdffrnmzJmTa9x2223ZN5aZPXu2nn/++X5BVfXxd0e2jGIxPfTQQ3r55ZezDSUfeughPfjgg9q0cZOmTJmiW2+9VR9++GGGDOHCpnbYYQddf/31qSyWYFPsDfvqV7+qadOmacGCBdptt911yy236Oabb9b777+fbYbMmDEjrQp0+kICpVwYwULffPPN3FljL7/88gwhFiQsrr322lR65syZ2fbiiy9O5ViMNrT37rvvpqL333+/br311lR++vTpevLJJ/Nz+jjppJN0xx136PLLL8/+N2/enHNhDXPIoEpvvaQR+xdffHEqTng8//zzOvXUU3X77benEvvss09aTowDxgkTJ+SiKHL00UfrpJNPygV32WUXTZ06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') repeat;
+      opacity: 0.02;
+      z-index: 9999;
+      pointer-events: none;
+    }
+
+    /* Media Queries */
+    @media (max-width: 992px) {
+      .logo {
+        font-size: 1.8rem;
+      }
+      
+      .symbol {
+        width: 50px;
+        height: 50px;
+      }
+      
+      nav a {
+        padding: 15px;
+      }
+      
+      .hero h2 {
+        font-size: 2rem;
+        padding: 30px;
+      }
+      
+      section {
+        padding: 70px 30px;
+      }
+      
+      .content-section h3 {
+        font-size: 2.2rem;
+      }
+      
+      #members-grid {
+        padding: 30px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      header {
+        padding: 20px;
+      }
+      
+      header.scrolled {
+        padding: 10px 20px;
+      }
+      
+      nav {
+        top: 85px;
+      }
+      
+      nav.scrolled {
+        top: 60px;
+      }
+      
+      nav a {
+        padding: 12px 15px;
+        font-size: 0.9rem;
+      }
+      
+      .hero {
+        padding-top: 180px;
+      }
+      
+      .hero h2 {
+        font-size: 1.6rem;
+        padding: 20px;
+      }
+      
+      section {
+        padding: 60px 20px;
+      }
+      
+      .content-section h3 {
+        font-size: 2rem;
+      }
+      
+      .content-section p {
+        font-size: 1.05rem;
+      }
+      
+      .grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      }
+      
+      .infinity-illusion {
+        padding: 30px 15px;
+      }
+      
+      .infinity-svg {
+        height: 180px;
+      }
+      
+      .link-grid, .library-grid, .archoviab-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+      }
+      
+      .contact-buttons {
+        flex-direction: column;
+        max-width: 300px;
+        margin: 30px auto;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .logo {
+        font-size: 1.5rem;
+      }
+      
+      .symbol {
+        width: 40px;
+        height: 40px;
+      }
+      
+      nav {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        top: 75px;
+      }
+      
+      nav.scrolled {
+        top: 55px;
+      }
+      
+      nav ul {
+        width: max-content;
+        padding: 0 10px;
+      }
+      
+      nav a {
+        padding: 10px;
+        font-size: 0.85rem;
+      }
+      
+      .hero {
+        padding-top: 150px;
+      }
+      
+      .hero h2 {
+        font-size: 1.4rem;
+        padding: 15px;
+        border-left: 3px solid var(--primary);
+        border-right: 3px solid var(--primary);
+      }
+      
+      section {
+        padding: 50px 15px;
+      }
+      
+      .content-section h3 {
+        font-size: 1.8rem;
+        letter-spacing: 1px;
+      }
+      
+      .content-section p {
+        font-size: 1rem;
+        line-height: 1.8;
+      }
+      
+      #members-grid {
+        padding: 20px 15px;
+      }
+      
+      .grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+      
+      .infinity-illusion {
+        margin: 40px auto;
+      }
+      
+      .infinity-svg {
+        height: 150px;
+      }
+      
+      .books li {
+        padding: 12px 15px;
+        margin: 15px 0;
+      }
+      
+      .books li a {
+        font-size: 1rem;
+      }
+    }
+
+    /* Additional animations for page elements */
+    .fade-in-element {
+      animation: fadeInElement 1.5s forwards;
+      opacity: 0;
+    }
+
+    @keyframes fadeInElement {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="noise-overlay"></div>
+
+  <header id="header">
+    <div class="logo-container">
+      <div class="logo glitch">ARCHOVIA</div>
+    </div>
+    <img class="symbol" src="logo.png" alt="Logo Symbol">
+  </header>
+
+  <nav id="nav">
+    <ul>
+      <li><a href="#mission">Mission</a></li>
+      <li><a href="#members">Examples</a></li>
+      <li><a href="#library">Library</a></li>
+      <li><a href="#onion">Onion</a></li>
+      <li><a href="#archovia">Own services</a></li>
+        <li><a href="#books">Books      </a></li>
+        <li><a href="#books">Books</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+  
+    <section class="hero">
+      <div id="particles-js"></div>
+      <h2 class="glitch">
+        The future belongs to those who believe in the beauty of their dreams.<br> " — Eleanor Roosevelt.
+      </h2>
+    </section>
+  
+    <section class="infinity-illusion fade-in-element">
+      <svg viewBox="0 0 400 200" preserveAspectRatio="xMidYMid meet" class="infinity-svg">
+        <defs>
+          <!-- Define the ∞-shaped path -->
+          <path id="infinityPath"
+                d="M50,100 
+                   C50,0 150,0 150,100 
+                   C150,200 250,200 250,100 
+                   C250,0 350,0 350,100" />
+        </defs>
+    
+        <!-- Four moving infinity symbols with enhanced glow effect -->
+        <text font-size="28" fill="#45f3ff" filter="url(#glow)">
+          <textPath href="#infinityPath" startOffset="0%">
+            ∞
+            <animate attributeName="startOffset" from="0%" to="100%" dur="8s" repeatCount="indefinite" />
+          </textPath>
+        </text>
+    
+        <text font-size="28" fill="#45f3ff" opacity="0.8" filter="url(#glow)">
+          <textPath href="#infinityPath" startOffset="25%">
+            ∞
+            <animate attributeName="startOffset" from="25%" to="125%" dur="8s" repeatCount="indefinite" />
+          </textPath>
+        </text>
+    
+        <text font-size="28" fill="#45f3ff" opacity="0.6" filter="url(#glow)">
+          <textPath href="#infinityPath" startOffset="50%">
+            ∞
+            <animate attributeName="startOffset" from="50%" to="150%" dur="8s" repeatCount="indefinite" />
+          </textPath>
+        </text>
+    
+        <text font-size="28" fill="#45f3ff" opacity="0.4" filter="url(#glow)">
+          <textPath href="#infinityPath" startOffset="75%">
+            ∞
+            <animate attributeName="startOffset" from="75%" to="175%" dur="8s" repeatCount="indefinite" />
+          </textPath>
+        </text>
+        
+        <!-- Add glow filter -->
+        <defs>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+      </svg>
+    </section>
+    
+    <section class="hero">
+      <h2 class="glitch">
+        "The important thing is not to stop questioning. Curiosity has its own reason for existing."<br/>
+      — Albert Einstein
+      </h2>
+    </section>
+    
+  
+    <section class="content-section fade-in-element" id="mission">
+      <h3>OUR MISSION</h3>
+      <p>
+        Our mission is to acquire knowledge, sharpen skill, and channel relentless curiosity into actions that matter. Through cyber intelligence, covert operations, and elite collaborations, we operate with precision, secrecy, and unwavering intent. This opportunity is rare. If not you, then someone else will rise. You've been given this moment—use it, own it, and when your mission is complete, let your legacy speak of honor, mastery, and fearless commitment.
+      </p>
+      <blockquote style="font-style: italic; font-weight: bold; color: #ccc; border-left: 4px solid #888; padding-left: 1em; margin-bottom: 1em;">
+        "They served with pride. They lived with purpose. They never wasted their shot."
+      </blockquote>
+    </section>
+    
+    
+  
+    <section class="content-section fade-in-element" id="members">
+      <h3>ARCHITECTS OF A BETTER WORLD</h3>
+      <p>
+        Across time, bold visionaries have dreamt of a world united—not by force, but by shared knowledge, compassion, and purpose. These pioneers believed in the possibility of a <strong class="neo-glow">utopia</strong>: a civilization where science serves humanity, borders dissolve before empathy, and collaboration triumphs over conflict.
+        <br><br>
+        Some paid with their lives, others changed the course of history. Together, they remind us that creating a better future isn't fantasy—it's a mission.
+      </p>
+    </section>
+    
+    <section id="members-grid" class="fade-in-element">
+      <div class="grid">
+        <div class="grid-item">
+          <div class="grid-item name"> <strong>Nikola Tesla</strong></div><br>Dreamed of free energy and a wireless world united by invention.
+        </div>
+        <div class="grid-item">
+          <div class="grid-item name"><strong>Alan Turing</strong></div><br>Saved millions, imagined intelligent machines that could think, serve, and elevate humanity.
+        </div>
+        <div class="grid-item">
+          <div class="grid-item name"><strong>Carl Sagan</strong></div><br>Spoke of Earth as "a pale blue dot," urging peace through cosmic perspective.
+        </div>
+         <div class="grid-item">
+          <div class="grid-item name"><strong>Martin Luther King Jr.</strong></div><br>Envisioned a world judged not by color, but by character.
+        </div>
+        <div class="grid-item">
+          <div class="grid-item name"> <strong>Bertrand Russell</strong></div><br>Philosopher of reason, calling for science with conscience.
+        </div>
+        <div class="grid-item">
+          <div class="grid-item name"><strong>J. Robert Oppenheimer</strong></div><br>Father of the atomic age, yet urged for peace and restraint.
+        </div>
+        <div class="grid-item">
+          <div class="grid-item name"><strong>John Lennon</strong></div><br>"Imagine all the people, living life in peace" — a utopia through love and song.
+        </div>
+      </div>
+    </section>
+    
+  
+    <section class="content-section fade-in-element" id="hidden-wisdom">
+      <h3>HIDDEN WISDOM & WORLDTOOL</h3>
+      <p>
+        Knowledge is the greatest tool for shaping a world based on intelligence, kindness, and unity. The remarkable discoveries of scientific minds and visionary thinkers illuminate the path to a future where humanity works together to advance both intellectually and compassionately. Insights from groundbreaking works like:
+      </p>
+      <ul>
+        <li><strong>"A Brief History of Time" by Stephen Hawking</strong> - Exploring the origins of the universe and our place within it, emphasizing the interconnectedness of all things.</li>
+        <li><strong>"The Selfish Gene" by Richard Dawkins</strong> - A revolutionary take on evolution that shows how cooperation and altruism are key to the survival of the species.</li>
+        <li><strong>"The Innovators" by Walter Isaacson</strong> - A tribute to the brilliant minds who created the digital revolution, showing how collaboration and shared knowledge build the future.</li>
+        <li><strong>"Cosmos" by Carl Sagan</strong> - A profound meditation on the universe, inspiring us to think of humanity as part of a greater cosmic community.</li>
+        <li><strong>"The Gene: An Intimate History" by Siddhartha Mukherjee</strong> - Explores the power of genetic science and how our shared biology can lead to greater understanding and compassion.</li>
+      </ul>
+      <p>
+        These works teach us that true progress stems from the pursuit of knowledge, the understanding of our collective place in the universe, and the empathy we have for each other as members of the same global community. Through learning and cooperation, we can build a world that transcends divisions and embraces the potential of all people.
+      </p>
+      <blockquote>
+        "Science is not only a disciple of reason but, also, one of romance and passion." — <strong>Stephen Hawking</strong>
+      </blockquote>
+    </section>
+  
+    <section class="links fade-in-element" id="library">
+      <h3>LINK LIBRARY</h3>
+      <div class="link-grid">
+        <a href="https://archive.org/"><i class="fas fa-archive"></i> Internet Archives</a>
+        <a href="https://www.securityblue.team/"><i class="fas fa-shield-alt"></i> Open-source intelligence training</a>
+        <a href="https://ciphereditor.com/"><i class="fas fa-key"></i> Crypto Playground</a>
+        <a href="https://www.cia.gov/"><i class="fas fa-user-secret"></i> CIA</a>
+        <a href="https://www.nsa.gov/"><i class="fas fa-microchip"></i> NSA</a>
+        <a href="https://www.cia.gov/resources/world-leaders/"><i class="fas fa-globe"></i> World leaders info by 'CIA'</a>
+        <a href="https://www.allaboutcircuits.com/"><i class="fas fa-bolt"></i> All About Circuits</a>
+        <a href="https://ocw.mit.edu/"><i class="fas fa-graduation-cap"></i> MIT OpenCourse</a>
+        <a href="https://dspace.mit.edu/"><i class="fas fa-university"></i> MIT "Resources-Repo"</a>
+        <a href="https://www.exploit-db.com/"><i class="fas fa-bug"></i> Zero-Day Vulnerability DB</a>
+        <a href="https://www.edge.org/"><i class="fas fa-brain"></i> Edge Questions</a>
+        <a href="https://www.n2yo.com/"><i class="fas fa-satellite"></i> Satellite Recon Streams</a>
+        <!-- NEW LINKS ADDED BELOW -->
+        <a href="https://www.schneier.com/"><i class="fas fa-lock"></i> Bruce Schneier on Security</a>
+        <a href="https://github.com/topics/cybersecurity"><i class="fab fa-github"></i> GitHub Cybersecurity Projects</a>
+        <a href="https://secwiki.org/"><i class="fas fa-book"></i> Security Wiki – Tools, Attacks, Techniques</a>
+        <a href="https://www.freecodecamp.org/"><i class="fas fa-code"></i> FreeCodeCamp (Learn Coding + Cybersecurity)</a>
+        <a href="https://projecteuler.net/"><i class="fas fa-calculator"></i> Project Euler (Math + Cryptography Problems)</a>
+        <a href="https://intelligence.org/"><i class="fas fa-robot"></i> Machine Intelligence Research Institute</a>
+        <a href="https://www.cybersecurity-help.cz/"><i class="fas fa-chart-line"></i> Cybersecurity Help Threat Intel</a>
+        <a href="https://ctftime.org/"><i class="fas fa-flag"></i> CTFTime (Capture The Flag Competitions)</a>
+        <a href="https://www.kaggle.com/"><i class="fas fa-database"></i> Kaggle (Data Science + AI Challenges)</a>
+        <a href="https://github.com/danielmiessler/SecLists"><i class="fas fa-list"></i> SecLists (Passwords, Payloads, etc.)</a>
+      </div>
+    </section>
+  
+    <section class="links library-section fade-in-element" id="onion">
+      <h3>ONION LINKS🧅</h3>
+      <div class="link-grid library-grid">
+        <a href="zqktlwiuavvvqqt4ybvgvi7tyo4hjl5xgfuvpdf6otjiycgwqbym2qad.onion"><i class="fas fa-book-open"></i> Orignal Hidden Wiki</a>
+        <a href="http://ciadotgov4sjwlzihbbgxnqg3xiyrg7so2r2o3lt5wz5ypk4sxyjstad.onion/"><i class="fas fa-user-secret"></i> CIA"onion (rec)"</a>
+        <a href="http://enxx3byspwsdo446jujc52ucy2pf5urdbhqw3kbsfhlfjwmbpj5smdad.onion"><i class="fas fa-comments"></i> Endchan</a>
+        <a href="http://dreadytofatroptsdj6io7l3xptbet6onoyno2yv7jicoxknyazubrad.onion/"><i class="fas fa-skull"></i> Dread! (most active form)</a>
+        <a href="http://pitchprash4aqilfr7sbmuwve3pnkpylqwxjbj2q5o4szcfeea6d27yd.onion/"><i class="fas fa-microphone"></i> Pitch</a>
+        <a href="http://tortimeswqlzti2aqbjoieisne4ubyuoeiiugel2layyudcfrwln76qd.onion"><i class="far fa-newspaper"></i> Tor times</a>
+        <a href="http://p53lf57qovyuvwsc6xnrppyply3vtqm7l6pcobkmyqsiofyeznfu5uqd.onion/"><i class="fas fa-bullhorn"></i> ProPublica (Journalism)</a>
+        <a href="http://torbox36ijlcevujx7mjb4oiusvwgvmue7jfn2cvutwa6kl6to3uyqad.onion"><i class="fas fa-envelope"></i> Tor Box</a>
+        <a href="http://monerotoruzizulg5ttgat2emf4d6fbmiea25detrmmy7erypseyteyd.onion"><i class="fab fa-monero"></i> Monero(crypto currency)</a>
+        <a href="http://xssforumv3isucukbxhdhwz67hoa5e2voakcfkuieq4ch257vsburuid.onion/"><i class="fas fa-code"></i> XSS-is</a>
+        <a href="http://biblemeowimkh3utujmhm6oh2oeb3ubjw2lpgeq3lahrfr2l6ev6zgyd.onion/"><i class="fas fa-book"></i> Darknet Bible</a>
+        <a href="http://x4ijfwy76n6jl7rs4qyhe6qi5rv6xyuos3kaczgjpjcajigjzk3k7wqd.onion/"><i class="fas fa-archive"></i> Onion Archive</a>
+        <a href="https://zpj4sjt4a5ah53s34utu2xhs7owdmgknc3xzvv6chpiodw5rdknkzbid.onion"><i class="fab fa-mastodon"></i> .mastodon(defconsocial)*</a>
+        <a href="http://g7ejphhubv5idbbu3hb3wawrs5adw7tkx7yjabnf65xtzztgg4hcsqqd.onion/"><i class="fas fa-terminal"></i> DEF_CON</a>
+        <a href="http://w27irt6ldaydjoacyovepuzlethuoypazhhbot6tljuywy52emetn7qd.onion/"><i class="fas fa-info-circle"></i> infocon</a>
+        <a href="https://bible4u2lvhacg4b3to2e2veqpwmrc2c3tjf2wuuqiz332vlwmr4xbad.onion/"><i class="fas fa-bible"></i> Bible4u</a>
+        <a href="http://kx5thpx2olielkihfyo4jgjqfb7zx7wxr3sd4xzt26ochei4m6f7tayd.onion/"><i class="fas fa-landmark"></i> Imperical Library</a>
+        <a href="http://keybase5wmilwokqirssclfnsqrjdsi7jdir5wy7y7iu3tanwmtp6oid.onion/"><i class="fas fa-key"></i> Keybase-IO</a>
+        <a href="http://volkancfgpi4c7ghph6id2t7vcntenuly66qjt6oedwtjmyj4tkk5oqd.onion/"><i class="fas fa-fire-alt"></i> Vorm web</a>
+        <a href="http://stormwayszuh4juycoy4kwoww5gvcu2c4tdtpkup667pdwe4qenzwayd.onion/"><i class="fas fa-cloud-showers-heavy"></i> cryptoStrom</a>
+        <a href="http://ncidetfs7banpz2d7vpndev5somwoki5vwdpfty2k7javniujekit6ad.onion/"><i class="fas fa-user-shield"></i> USA's NCIDE Task Force</a>
+        <a href="http://juhanurmihxlp77nkq76byazcldy2hlmovfu2epvl5ankdibsot4csyd.onion/"><i class="fas fa-search"></i> Ahmia(most active search engine)</a>
+      </div>
+      <h4><i class="fas fa-exclamation-triangle"></i> visit by care</h4>
+    </section>
+  
+    <section class="archovi fade-in-element" id="archovia">      
+      <h2>Archovia Services</h2>
+      
+      <div class="archoviab-grid">
+        <a href="account.html"><i class="fas fa-user-circle"></i> AccountsInfo</a>
+        <a href="Hexveil.html"><i class="fas fa-mask"></i> Hexveil (basic cryptography)</a>
+        <a href="crptoexc.html"><i class="fas fa-lock"></i> CryptoExc(all old cryptography method)</a>
+        <a href="sentrio4exge64b3q6bjjjgurtc56utp4gilxszzecircc2g5ccostid.onion"><i class="fas fa-comments"></i> Sentria (live-chatroom)</a>
+        <a href="news.html"><i class="fas fa-newspaper"></i> AI-vohcra Network (news)</a>
+        <a href="archnova.html"><i class="fas fa-graduation-cap"></i> Arkanova(learning space)</a>
+      </div>
+    </section>
+  
+    <section class="books fade-in-element" id="books">
+      <h3>RECOMMENDED BOOKS</h3>
+      <ul>
+        <li><a href="books/TOR info.pdf"><i class="fas fa-book"></i> "Tor information"</a></li>
+        <li><a href="books/spycraft.pdf"><i class="fas fa-user-secret"></i> "Spycraft: The Secret History of the CIA's Spytechs"</a></li>
+        <li><a href="books/Permanent Record .pdf"><i class="fas fa-file-alt"></i> "'Permanent Record' By Edward Snowden"</a></li>
+        <li><a href="books/The code book .pdf"><i class="fas fa-code"></i> "The Code Book" by Simon Singh</a></li>
+        <li><a href="books/The Age of Surveillance Capitalism.pdf"><i class="fas fa-eye"></i> "Surveillance Capitalism by Shoshana Zuboff"</a></li>
+        <li><a href="books/hacking 'kevinsmith'.pdf"><i class="fas fa-terminal"></i> "how to hack by kevin smith"</a></li>
+        <li><a href="books/Aircraft Design .pdf"><i class="fas fa-plane"></i> "Aircraft design"</a></li>
+      </ul>
+    </section>
+  
+    <section class="content-section fade-in-element" id="contact">
+      <h3>CONTACT US</h3>
+      <p>For encrypted communication and further recruitment inquiry, reach out to us securely via ZeroNet or drop a PGP message through our Git repo.</p>
+      <div class="contact-buttons">
+        <a href="http://wun44djqnsuiwr3xb7nypkhpusfjmndpx7b65svrtdbe2324r3tz6jad.onion/message/"><i class="fas fa-envelope"></i> Send Encrypted Email</a>
+        <a href="#"><i class="fas fa-network-wired"></i> Access ZeroNet Node</a>
+      </div>
+    </section>
+  
+    <footer>
+      &copy; 1997 Archovia. All operations confidential. Unauthorized access is monitored.
+    </footer>
+  
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+
+// ✅ More reliable session-based auth check for main.html
+const isLoggedIn = sessionStorage.getItem('archovia_logged_in');
+
+if (isLoggedIn !== 'true') {
+  alert('Unauthorized. Redirecting...');
+  window.location.href = 'index.html';
+}
+
+
+      // Header scroll effect
+      window.addEventListener('scroll', function() {
+        const header = document.getElementById('header');
+        const nav = document.getElementById('nav');
+        if (window.scrollY > 50) {
+          header.classList.add('scrolled');
+          nav.classList.add('scrolled');
+        } else {
+          header.classList.remove('scrolled');
+          nav.classList.remove('scrolled');
+        }
+      });
+  
+      // Particles.js configuration for hero section
+      document.addEventListener('DOMContentLoaded', function() {
+        particlesJS("particles-js", {
+          "particles": {
+            "number": {
+              "value": 80,
+              "density": {
+                "enable": true,
+                "value_area": 800
+              }
+            },
+            "color": {
+              "value": "#45f3ff"
+            },
+            "shape": {
+              "type": "circle",
+              "stroke": {
+                "width": 0,
+                "color": "#000000"
+              },
+              "polygon": {
+                "nb_sides": 5
+              }
+            },
+            "opacity": {
+              "value": 0.5,
+              "random": true,
+              "anim": {
+                "enable": true,
+                "speed": 1,
+                "opacity_min": 0.1,
+                "sync": false
+              }
+            },
+            "size": {
+              "value": 3,
+              "random": true,
+              "anim": {
+                "enable": false,
+                "speed": 40,
+                "size_min": 0.1,
+                "sync": false
+              }
+            },
+            "line_linked": {
+              "enable": true,
+              "distance": 150,
+              "color": "#45f3ff",
+              "opacity": 0.4,
+              "width": 1
+            },
+            "move": {
+              "enable": true,
+              "speed": 2,
+              "direction": "none",
+              "random": true,
+              "straight": false,
+              "out_mode": "out",
+              "bounce": false,
+              "attract": {
+                "enable": true,
+                "rotateX": 600,
+                "rotateY": 1200
+              }
+            }
+          },
+          "interactivity": {
+            "detect_on": "canvas",
+            "events": {
+              "onhover": {
+                "enable": true,
+                "mode": "grab"
+              },
+              "onclick": {
+                "enable": true,
+                "mode": "push"
+              },
+              "resize": true
+            },
+            "modes": {
+              "grab": {
+                "distance": 140,
+                "line_linked": {
+                  "opacity": 1
+                }
+              },
+              "bubble": {
+                "distance": 400,
+                "size": 40,
+                "duration": 2,
+                "opacity": 8,
+                "speed": 3
+              },
+              "repulse": {
+                "distance": 200,
+                "duration": 0.4
+              },
+              "push": {
+                "particles_nb": 4
+              },
+              "remove": {
+                "particles_nb": 2
+              }
+            }
+          },
+          "retina_detect": true
+        });
+      });
+  
+      // Intersection Observer for fade-in animations
+      document.addEventListener('DOMContentLoaded', function() {
+        const fadeElements = document.querySelectorAll('.fade-in-element');
+        
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.style.animation = 'fadeInElement 1.5s forwards';
+              observer.unobserve(entry.target);
+            }
+          });
+        }, {
+          threshold: 0.1,
+          rootMargin: '0px 0px -50px 0px'
+        });
+        
+        fadeElements.forEach(element => {
+          observer.observe(element);
+        });
+      });
+    </script>
+  </body>
+  </html>
+  

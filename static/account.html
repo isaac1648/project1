@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Secure Vault Manager</title>
+  <style>
+    :root {
+      --bg-color: #121212;
+      --card-color: #1e1e1e;
+      --accent-color: #2c2c2c;
+      --text-color: #eeeeee;
+      --hover-color: #3a3a3a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: 'Poppins', sans-serif;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2.8rem;
+      letter-spacing: 1px;
+    }
+    .notice {
+      background: var(--card-color);
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease-in-out;
+    }
+
+    .notice p{
+      margin-bottom: 10px;
+      font-size: 1.2rem;
+    }
+    .platform {
+      background: var(--card-color);
+      border-radius: 10px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+      margin-bottom: 25px;
+      overflow: hidden;
+      transition: all 0.4s ease;
+    }
+
+    .platform-header {
+      background: var(--accent-color);
+      padding: 18px 20px;
+      font-size: 1.6rem;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .platform-header:hover {
+      background: var(--hover-color);
+    }
+
+    .toggle-icon {
+      font-size: 1.2rem;
+      transition: transform 0.4s;
+    }
+
+    .rotated {
+      transform: rotate(90deg);
+    }
+
+    .accounts {
+      display: none;
+      padding: 20px;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .account-card {
+      background: #262626;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      transition: background 0.3s ease;
+    }
+
+    .account-card:hover {
+      background: #2e2e2e;
+    }
+
+    .info p, .details p {
+      margin: 6px 0;
+      font-size: 0.92rem;
+    }
+
+    .password-field {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .password-text {
+      font-family: monospace;
+      margin-right: 10px;
+      font-size: 0.95rem;
+    }
+
+    .actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      background: var(--accent-color);
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      color: var(--text-color);
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: var(--hover-color);
+    }
+
+    .copy-status {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #2b2b2b;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+      display: none;
+      font-weight: bold;
+      color: #ccc;
+      z-index: 1000;
+    }
+
+    @media (max-width: 600px) {
+      .platform-header {
+        font-size: 1.4rem;
+      }
+
+      button {
+        flex: 1 1 100%;
+      }
+    }
+  </style>
+</head>
+<body> 
+  
+
+<h1><span style="color: #1c27f3;">Accounts <span style="color: #f11c1c;">INFO</span> </h1>
+
+<div class="notice"> 
+  <p> This page contains multiple dummy account and their credential you can use them to use platform and stay save!!! </p>
+  
+</div>
+
+<div id="platforms"></div>
+
+<div id="copyStatus" class="copy-status"></div>
+
+<script>
+  const data = [
+    { name: "Email Accounts", accounts: [
+      { id: "me@example.com", password: "pass1234", notes: "Backup enabled" },
+      { id: "work@company.com", password: "work321", notes: "Office email" }
+    ]},
+    { name: "GitHub", accounts: [
+      { id: "devmaster", password: "gitpass@123", notes: "SSH added" }
+    ]},
+    { name: "Instagram", accounts: [
+      { id: "insta_boss", password: "insta@999", notes: "2FA enabled" }
+    ]},
+    { name: "Netflix", accounts: [
+      { id: "myflixuser", password: "flixstrong", notes: "Shared with family" }
+    ]},
+    { name: "Amazon", accounts: [
+      { id: "primebuyer88", password: "primepass!!", notes: "Giftcards saved" }
+    ]},
+    { name: "PayPal", accounts: [
+      { id: "paysecure", password: "money$pass", notes: "Linked with bank" }
+    ]},
+    { name: "Reddit", accounts: [
+      { id: "meme_king99", password: "memes@420", notes: "Verified Email" }
+    ]},
+    { name: "Twitter", accounts: [
+      { id: "tweetspro", password: "bird123$", notes: "No 2FA yet" }
+    ]}
+  ];
+
+  const platformsDiv = document.getElementById('platforms');
+
+  data.forEach(platform => {
+    const platformElement = document.createElement('div');
+    platformElement.className = 'platform';
+    platformElement.innerHTML = `
+      <div class="platform-header" onclick="toggleAccounts(this)">
+        ${platform.name}
+        <span class="toggle-icon">▶️</span>
+      </div>
+      <div class="accounts">
+        ${platform.accounts.map(acc => `
+          <div class="account-card">
+            <div class="info">
+              <p><strong>ID:</strong> ${acc.id}</p>
+              <div class="password-field">
+                <p><strong>Password:</strong> <span class="password-text" data-password="${acc.password}">••••••••</span></p>
+                <button onclick="togglePassword(this)">👁️</button>
+              </div>
+              <div class="details">
+                <p><strong>Notes:</strong> ${acc.notes}</p>
+              </div>
+            </div>
+            <div class="actions">
+              <button onclick="copyText('${acc.id}')">Copy ID</button>
+              <button onclick="copyPassword(this)">Copy Password</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    platformsDiv.appendChild(platformElement);
+  });
+
+  function copyText(text) {
+    navigator.clipboard.writeText(text).then(() => {
+      showCopyStatus('Copied: ' + text);
+    });
+  }
+
+  function copyPassword(button) {
+    const passwordText = button.closest('.account-card').querySelector('.password-text').dataset.password;
+    navigator.clipboard.writeText(passwordText).then(() => {
+      showCopyStatus('Password Copied');
+    });
+  }
+
+  function togglePassword(button) {
+    const passwordSpan = button.parentElement.querySelector('.password-text');
+    const isHidden = passwordSpan.innerText.includes('•');
+    if (isHidden) {
+      passwordSpan.innerText = passwordSpan.dataset.password;
+    } else {
+      passwordSpan.innerText = '•'.repeat(passwordSpan.dataset.password.length);
+    }
+  }
+
+  function toggleAccounts(header) {
+    const accounts = header.nextElementSibling;
+    const icon = header.querySelector('.toggle-icon');
+    if (accounts.style.display === 'block') {
+      accounts.style.display = 'none';
+      icon.classList.remove('rotated');
+    } else {
+      accounts.style.display = 'block';
+      icon.classList.add('rotated');
+    }
+  }
+
+  function showCopyStatus(message) {
+    const status = document.getElementById('copyStatus');
+    status.innerText = message;
+    status.style.display = 'block';
+    setTimeout(() => {
+      status.style.display = 'none';
+    }, 2000);
+  }
+</script>
+
+</body>
+</html>

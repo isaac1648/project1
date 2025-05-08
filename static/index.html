@@ -1,0 +1,2572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebCLI - Professional Command Line Interface</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #1e1e2e;
+            --text-color: #cdd6f4;
+            --prompt-color: #a6e3a1;
+            --accent-color: #f38ba8;
+            --success-color: #89b4fa;
+            --error-color: #f38ba8;
+            --warning-color: #fab387;
+            --info-color: #89dceb;
+        }
+        
+        body {
+            font-family: 'Fira Code', monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        #terminal {
+            height: 100%;
+            width: 100%;
+            overflow-y: auto;
+            padding: 16px;
+            box-sizing: border-box;
+        }
+        
+        #terminal::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        #terminal::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        
+        #terminal::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+        
+        #terminal::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .prompt {
+            color: var(--prompt-color);
+            margin-right: 8px;
+            font-weight: 600;
+        }
+        
+        .command-input {
+            background-color: transparent;
+            border: none;
+            color: var(--text-color);
+            font-family: 'Fira Code', monospace;
+            font-size: 16px;
+            outline: none;
+            width: calc(100% - 150px);
+        }
+        
+        .command-line {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+        
+        .output-line {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+        
+        .input-area {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 18px;
+            background-color: var(--text-color);
+            margin-left: 2px;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        
+        .error { color: var(--error-color); }
+        .success { color: var(--success-color); }
+        .warning { color: var(--warning-color); }
+        .info { color: var(--info-color); }
+        
+        .welcome-ascii {
+            color: var(--accent-color);
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+        
+        .menu-bar {
+            display: flex;
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 8px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .menu-item {
+            margin-right: 16px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        
+        .menu-item:hover {
+            opacity: 1;
+        }
+        
+        .suggestion-box {
+            position: absolute;
+            background-color: rgba(30, 30, 46, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            padding: 8px;
+            z-index: 100;
+            max-height: 200px;
+            overflow-y: auto;
+            width: 200px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            top: 100%;
+            left: 0;
+            display: none;
+        }
+        
+        .suggestion {
+            padding: 4px 8px;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+        
+        .suggestion:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .file-tree {
+            font-family: 'Fira Code', monospace;
+            margin-bottom: 12px;
+        }
+        
+        .directory {
+            color: var(--prompt-color);
+        }
+        
+        .file {
+            color: var(--text-color);
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            margin: 8px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--success-color);
+            transition: width 0.3s;
+        }
+        
+        .theme-switcher {
+            position: absolute;
+            right: 16px;
+            top: 16px;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .theme-option {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .theme-option:hover {
+            transform: scale(1.1);
+        }
+        
+        .theme-option.active {
+            border-color: white;
+        }
+        
+        .notifications {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .notification {
+            background-color: rgba(0, 0, 0, 0.7);
+            border-left: 4px solid var(--success-color);
+            padding: 12px 16px;
+            border-radius: 4px;
+            animation: slideIn 0.3s, fadeOut 0.3s 2.7s;
+            opacity: 0;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+    </style>
+</head>
+<body class="overflow-hidden">
+    <div class="menu-bar">
+        <div class="menu-item" onclick="toggleHelp()"><i class="fas fa-question-circle mr-1"></i> Help</div>
+        <div class="menu-item" onclick="toggleThemes()"><i class="fas fa-palette mr-1"></i> Themes</div>
+        <div class="menu-item" onclick="toggleFullScreen()"><i class="fas fa-expand mr-1"></i> Fullscreen</div>
+        <div class="menu-item" onclick="downloadHistory()"><i class="fas fa-download mr-1"></i> Export</div>
+    </div>
+    
+    <div id="terminal">
+        <!-- Terminal content will be dynamically generated here -->
+    </div>
+    
+    <div id="themeMenu" class="hidden absolute right-4 top-12 bg-gray-800 bg-opacity-95 p-3 rounded shadow-lg">
+        <div class="flex flex-wrap gap-2">
+            <div class="theme-option active" style="background-color: #1e1e2e;" data-theme="catppuccin"></div>
+            <div class="theme-option" style="background-color: #282c34;" data-theme="nord"></div>
+            <div class="theme-option" style="background-color: #24283b;" data-theme="tokyonight"></div>
+            <div class="theme-option" style="background-color: #0f111a;" data-theme="material"></div>
+            <div class="theme-option" style="background-color: #2E3440;" data-theme="dracula"></div>
+            <div class="theme-option" style="background-color: #292d3e;" data-theme="palenight"></div>
+        </div>
+    </div>
+    
+    <div class="notifications" id="notifications"></div>
+    <canvas id="matrixCanvas" class="matrix-bg"></canvas>
+
+    <script>
+        // Global variables
+        let commandHistory = [];
+        let historyIndex = -1;
+        let currentDirectory = "~";
+        let username = "guest";
+        let fileSystem = {
+            "~": {
+                "documents": {
+                    "notes.txt": "These are some important notes.\nRemember to update the system later.",
+                    "todo.md": "# Todo List\n- Finish project\n- Update documentation\n- Deploy to server"
+                },
+                "downloads": {},
+                "pictures": {
+                    "image.jpg": "[Image file]"
+                },
+                "README.txt": "Welcome to WebCLI!\nType 'help' to see available commands."
+            }
+        };
+        let todos = [];
+        let currentTheme = "catppuccin";
+        let isMatrixEnabled = false;
+        
+         
+        
+        // Available commands
+        const commands = {
+            help: { desc: "Show available commands" },
+            clear: { desc: "Clear the terminal" },
+            echo: { desc: "Print text to terminal" },
+            whoami: { desc: "Display current user" },
+            date: { desc: "Show current date and time" },
+            ls: { desc: "List files in directory" },
+            cat: { desc: "Display file contents" },
+            touch: { desc: "Create a new file" },
+            mkdir: { desc: "Create a new directory" },
+            cd: { desc: "Change directory" },
+            pwd: { desc: "Show current directory" },
+            rm: { desc: "Remove file or directory" },
+            weather: { desc: "Show weather forecast" },
+            calc: { desc: "Simple calculator" },
+            timer: { desc: "Set a countdown timer" },
+            todo: { desc: "Todo list manager" },
+            search: { desc: "Search the web" },
+            game: { desc: "Play a simple game" },
+            matrix: { desc: "Toggle Matrix effect" },
+            banner: { desc: "Show ASCII banner" },
+            theme: { desc: "Change terminal theme" },
+            history: { desc: "Show command history" },
+            alias: { desc: "Create command alias" },
+            ip: { desc: "Show IP information" },
+            fortune: { desc: "Show random fortune" },
+            system: { desc: "Display system info" },
+            man: { desc: "Display manual for command" },
+            fetch: { desc: "Display system info with logo" },
+            login: { desc: "Set username" },
+            logout: { desc: "Reset to guest user" },
+            nano: { desc: "Text editor to create and edit files" }
+
+        };
+        
+        // Command aliases
+        const aliases = {
+            ll: "ls -l",
+            la: "ls -a",
+            cls: "clear",
+            ...(localStorage.getItem('webcli_aliases') ? JSON.parse(localStorage.getItem('webcli_aliases')) : {})
+        };
+        
+        // Initialize terminal
+        document.addEventListener("DOMContentLoaded", function() {
+            initTerminal();
+            showWelcomeMessage();
+            loadTheme(currentTheme);
+            initMatrixEffect();
+            
+            // Load saved settings
+            if (localStorage.getItem('webcli_username')) {
+                username = localStorage.getItem('webcli_username');
+            }
+            
+            if (localStorage.getItem('webcli_todos')) {
+                todos = JSON.parse(localStorage.getItem('webcli_todos'));
+            }
+            
+            if (localStorage.getItem('webcli_theme')) {
+                loadTheme(localStorage.getItem('webcli_theme'));
+            }
+            
+            // Focus on new input
+            focusOnInput();
+        });
+        
+        function initTerminal() {
+            window.addEventListener('click', function(e) {
+                if (e.target.id !== 'terminal' && !e.target.closest('#themeMenu')) {
+                    document.getElementById('themeMenu').classList.add('hidden');
+                }
+                focusOnInput();
+            });
+            
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    autocompleteCommand();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    navigateHistory('up');
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    navigateHistory('down');
+                } else if (e.key === 'l' && e.ctrlKey) {
+                    e.preventDefault();
+                    clearTerminal();
+                }
+            });
+        }
+        
+        function showWelcomeMessage() {
+            const terminal = document.getElementById('terminal');
+            terminal.innerHTML = `
+                <pre class="welcome-ascii">
+ _       __     __    ________    ____
+| |     / /__  / /_  / ____/ /   /  _/
+| | /| / / _ \\/ __ \\/ /   / /    / /  
+| |/ |/ /  __/ /_/ / /___/ /____/ /   
+|__/|__/\\___/_.___/\\____/_____/___/   
+                                      
+                </pre>
+                <div class="output-line info">Welcome to WebCLI v1.0.0</div>
+                <div class="output-line">Type <span class="success">'help'</span> to see available commands.</div>
+                <div class="output-line">Current time: ${new Date().toLocaleString()}</div>
+                <br>
+            `;
+            
+            addNewPrompt();
+        }
+        
+        function addNewPrompt() {
+            const terminal = document.getElementById('terminal');
+            
+            const commandLine = document.createElement('div');
+            commandLine.className = 'command-line';
+            
+            const prompt = document.createElement('span');
+            prompt.className = 'prompt';
+            prompt.innerHTML = `${username}@webcli:${currentDirectory}$ `;
+            
+            const inputArea = document.createElement('div');
+            inputArea.className = 'input-area flex-grow';
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'command-input';
+            input.autocapitalize = 'off';
+            input.autocomplete = 'off';
+            input.spellcheck = false;
+            
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const command = this.value.trim();
+                    processCommand(command);
+                }
+            });
+            
+            const cursor = document.createElement('span');
+            cursor.className = 'cursor';
+            
+            inputArea.appendChild(input);
+            inputArea.appendChild(cursor);
+            
+            commandLine.appendChild(prompt);
+            commandLine.appendChild(inputArea);
+            
+            terminal.appendChild(commandLine);
+            input.focus();
+            
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+        
+        function processCommand(commandText) {
+            const terminal = document.getElementById('terminal');
+            const commandLine = terminal.lastElementChild;
+            const input = commandLine.querySelector('input');
+            
+            // Replace input with plain text
+            const inputText = document.createTextNode(commandText);
+            input.parentNode.replaceChild(inputText, input);
+            commandLine.querySelector('.cursor').remove();
+            
+            // Add to history if not empty
+            if (commandText.trim() !== '') {
+                commandHistory.push(commandText);
+                historyIndex = commandHistory.length;
+            }
+            
+            if (commandText.trim() === '') {
+                addNewPrompt();
+                return;
+            }
+            
+            // Check if it's an alias
+            let commandToExecute = commandText;
+            for (const [alias, cmd] of Object.entries(aliases)) {
+                if (commandText === alias || commandText.startsWith(alias + ' ')) {
+                    commandToExecute = commandText.replace(alias, cmd);
+                    break;
+                }
+            }
+            
+            // Parse command and args
+            const args = commandToExecute.split(' ');
+            const command = args[0].toLowerCase();
+            
+            // Process the command
+            executeCommand(command, args.slice(1));
+        }
+        
+        function executeCommand(command, args) {
+    const API_BASE_URL = 'http://localhost:5500';
+
+    // Secret command: echo /archovia [username]
+    if (command === 'echo' && args.length >= 2 && args[0] === '/archovia') {
+        const requestedUsername = args.slice(1).join(' ').toLowerCase();
+        addOutputLine(`Verifying access for user: ${requestedUsername}...`, 'info');
+
+        fetch(`${API_BASE_URL}/verify-user`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: requestedUsername }),
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                sessionStorage.setItem('archovia_auth_key', data.key);
+                addOutputLine(`Access granted for user: ${requestedUsername}`, 'success');
+                addOutputLine(`Use 'open-${data.key}' to proceed.`, 'info');
+            } else {
+                addOutputLine(`Server verification failed: ${data.message}`, 'error');
+            }
+        })
+        .catch(err => {
+            addOutputLine(`Connection error: ${err.message}`, 'error');
+        });
+
+        return;
+    }
+
+    // Secret command: open-[key]
+    if (command.startsWith('open-')) {
+        const key = command.substring(5);
+        if (!key || key.length !== 32) {
+            addOutputLine('Invalid key format.', 'error');
+            return;
+        }
+
+        addOutputLine('Validating security key...', 'info');
+        fetch(`${API_BASE_URL}/validate-key`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key }),
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                addOutputLine(`Key accepted. Welcome, ${data.username}!`, 'success');
+                sessionStorage.setItem('archovia_logged_in', 'true');
+
+                setTimeout(() => {
+                    window.location.href = 'main.html';
+                }, 1500);
+            } else {
+                addOutputLine(`Key validation failed: ${data.message}`, 'error');
+            }
+        })
+        .catch(err => {
+            addOutputLine(`Connection error: ${err.message}`, 'error');
+        });
+
+        return;
+    }
+
+    // 👇 All other general CLI commands
+    handleGeneralCommand(command, args);
+}
+
+
+    // 👇 General commands go here
+    function handleGeneralCommand(command, args) {
+    switch (command) {
+        case 'help':
+            showHelp(args);
+            break;
+        case 'clear':
+            clearTerminal();
+            break;
+        case 'echo':
+            echoText(args);
+            break;
+        case 'whoami':
+            addOutputLine(username);
+            break;
+        case 'date':
+            addOutputLine(new Date().toLocaleString());
+            break;
+        case 'ls':
+            listFiles(args);
+            break;
+        case 'cat':
+            catFile(args);
+            break;
+        case 'touch':
+            touchFile(args);
+            break;
+        case 'mkdir':
+            makeDirectory(args);
+            break;
+        case 'cd':
+            changeDirectory(args);
+            break;
+        case 'pwd':
+            addOutputLine(currentDirectory);
+            break;
+        case 'rm':
+            removeFile(args);
+            break;
+        case 'weather':
+            showWeather(args);
+            break;
+        case 'calc':
+            calculator(args);
+            break;
+        case 'timer':
+            setTimer(args);
+            break;
+        case 'todo':
+            todoManager(args);
+            break;
+        case 'search':
+            webSearch(args);
+            break;
+        case 'game':
+            playGame(args);
+            break;
+        case 'matrix':
+            toggleMatrix();
+            break;
+        case 'banner':
+            showBanner(args);
+            break;
+        case 'theme':
+            changeTheme(args);
+            break;
+        case 'history':
+            showHistory();
+            break;
+        case 'alias':
+            manageAlias(args);
+            break;
+        case 'ip':
+            showIpInfo();
+            break;
+        case 'fortune':
+            showFortune();
+            break;
+        case 'system':
+            showSystemInfo();
+            break;
+        case 'man':
+            showManual(args);
+            break;
+        case 'fetch':
+            showFetch();
+            break;
+        case 'nano':
+            nanoEditor(args);
+            break;
+        case 'login':
+            login(args);
+            break;
+        case 'logout':
+            logout();
+            break;
+        default:
+            addOutputLine(`Command not found: ${command}. Type 'help' to see available commands.`, 'error');
+    }
+
+    addNewPrompt();
+}
+
+
+
+        
+        function showHelp(args) {
+            if (args.length > 0) {
+                const commandName = args[0];
+                if (commands[commandName]) {
+                    showManual([commandName]);
+                    return;
+                } else {
+                    addOutputLine(`No help available for '${commandName}'`, 'error');
+                    return;
+                }
+            }
+            
+            addOutputLine('Available commands:', 'info');
+            
+            // Group commands by category for better organization
+            const categories = {
+                "File Operations": ["ls", "cat", "touch", "mkdir", "cd", "pwd", "rm"],
+                "System": ["clear", "echo", "whoami", "date", "system", "fetch", "ip"],
+                "Tools": ["weather", "calc", "timer", "todo", "search", "fortune"],
+                "Terminal": ["help", "history", "alias", "theme", "matrix", "banner", "man"],
+                "User": ["login", "logout"],
+                "Fun": ["game"]
+            };
+            
+            for (const [category, cmdList] of Object.entries(categories)) {
+                addOutputLine(`\n${category}:`, 'success');
+                let output = '';
+                for (const cmd of cmdList) {
+                    output += `  <span class="info">${cmd.padEnd(10)}</span> - ${commands[cmd].desc}\n`;
+                }
+                addOutputLine(output);
+            }
+            
+            addOutputLine("\nUse 'man [command]' for more details on specific commands.");
+        }
+        
+        function clearTerminal() {
+            const terminal = document.getElementById('terminal');
+            terminal.innerHTML = '';
+        }
+        
+        function echoText(args) {
+            addOutputLine(args.join(' '));
+        }
+        
+        function listFiles(args) {
+            // Parse options
+            const showHidden = args.includes('-a');
+            const longFormat = args.includes('-l');
+            
+            // Get target directory
+            let targetDir = getCurrentDirObject();
+            let path = args.find(arg => !arg.startsWith('-'));
+            
+            if (path) {
+                // Navigate to specified path
+                const pathParts = path.split('/').filter(p => p);
+                targetDir = navigatePath(targetDir, pathParts);
+                
+                if (!targetDir) {
+                    addOutputLine(`ls: cannot access '${path}': No such file or directory`, 'error');
+                    return;
+                }
+            }
+            
+            // Get files and directories
+            const items = Object.keys(targetDir);
+            
+            if (items.length === 0) {
+                addOutputLine("Directory is empty");
+                return;
+            }
+            
+            // Display in appropriate format
+            if (longFormat) {
+                const now = new Date();
+                addOutputLine("total " + items.length);
+                
+                for (const item of items) {
+                    const isDir = typeof targetDir[item] === 'object';
+                    const permissions = isDir ? "drwxr-xr-x" : "-rw-r--r--";
+                    const size = isDir ? "-" : Math.floor(Math.random() * 10000);
+                    const dateStr = now.toLocaleString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric', 
+                        hour: '2-digit', 
+                        minute: '2-digit'
+                    });
+                    
+                    addOutputLine(`${permissions} 1 ${username} ${username} ${size.toString().padStart(5)} ${dateStr} ${item}${isDir ? "/" : ""}`);
+                }
+            } else {
+                let output = "";
+                for (const item of items) {
+                    const isDir = typeof targetDir[item] === 'object';
+                    if (isDir) {
+                        output += `<span class="directory">${item}/</span>  `;
+                    } else {
+                        output += `<span class="file">${item}</span>  `;
+                    }
+                }
+                addOutputLine(output);
+            }
+        }
+        
+        function catFile(args) {
+            if (args.length === 0) {
+                addOutputLine("Usage: cat <filename>", "error");
+                return;
+            }
+            
+            const filename = args[0];
+            const currentDir = getCurrentDirObject();
+            
+            if (!currentDir[filename]) {
+                addOutputLine(`cat: ${filename}: No such file or directory`, "error");
+                return;
+            }
+            
+            if (typeof currentDir[filename] === 'object') {
+                addOutputLine(`cat: ${filename}: Is a directory`, "error");
+                return;
+            }
+            
+            addOutputLine(currentDir[filename]);
+        }
+        
+        function touchFile(args) {
+            if (args.length === 0) {
+                addOutputLine("Usage: touch <filename>", "error");
+                return;
+            }
+            
+            const filename = args[0];
+            const currentDir = getCurrentDirObject();
+            
+            if (typeof currentDir[filename] === 'object') {
+                addOutputLine(`touch: cannot touch '${filename}': Is a directory`, "error");
+                return;
+            }
+            
+            if (!currentDir[filename]) {
+                currentDir[filename] = "";
+                addOutputLine(`Created file: ${filename}`, "success");
+            } else {
+                addOutputLine(`File already exists: ${filename}. Timestamp updated.`);
+            }
+        }
+        
+        function makeDirectory(args) {
+            if (args.length === 0) {
+                addOutputLine("Usage: mkdir <dirname>", "error");
+                return;
+            }
+            
+            const dirname = args[0];
+            const currentDir = getCurrentDirObject();
+            
+            if (currentDir[dirname]) {
+                addOutputLine(`mkdir: cannot create directory '${dirname}': File exists`, "error");
+                return;
+            }
+            
+            currentDir[dirname] = {};
+            addOutputLine(`Created directory: ${dirname}`, "success");
+        }
+        
+        function changeDirectory(args) {
+            const path = args.length > 0 ? args[0] : "~";
+            
+            if (path === "..") {
+                // Go up one directory
+                if (currentDirectory === "~") {
+                    addOutputLine("Already at root directory");
+                    return;
+                }
+                
+                const parts = currentDirectory.split("/");
+                parts.pop(); // Remove last part
+                currentDirectory = parts.join("/") || "~";
+                return;
+            }
+            
+            if (path === "~" || path === "/") {
+                currentDirectory = "~";
+                return;
+            }
+           
+            // Handle absolute paths
+            let newPath;
+            if (path.startsWith("~/") || path === "~") {
+                newPath = path === "~" ? "~" : path.substring(2);
+            } else if (path.startsWith("/")) {
+                newPath = "~" + path;
+            } else {
+                // Relative path
+                newPath = currentDirectory === "~" ? 
+                    "~/" + path : 
+                    currentDirectory + "/" + path;
+            }
+            
+            // Check if directory exists
+            const pathParts = newPath.split("/").filter(p => p && p !== "~");
+            let currentObj = fileSystem["~"];
+            
+            for (const part of pathParts) {
+                if (!currentObj[part]) {
+                    addOutputLine(`cd: ${part}: No such file or directory`, "error");
+                    return;
+                }
+                
+                if (typeof currentObj[part] !== "object") {
+                    addOutputLine(`cd: ${part}: Not a directory`, "error");
+                    return;
+                }
+                
+                currentObj = currentObj[part];
+            }
+            
+            currentDirectory = newPath === "~" ? "~" : newPath;
+        }
+        
+        function removeFile(args) {
+            if (args.length === 0) {
+                addOutputLine("Usage: rm [-r] <filename>", "error");
+                return;
+            }
+            
+            const recursive = args[0] === "-r";
+            const target = recursive ? args[1] : args[0];
+            
+            if (!target) {
+                addOutputLine("Missing operand", "error");
+                return;
+            }
+            
+            const currentDir = getCurrentDirObject();
+            
+            if (!currentDir[target]) {
+                addOutputLine(`rm: cannot remove '${target}': No such file or directory`, "error");
+                return;
+            }
+            
+            if (typeof currentDir[target] === "object" && !recursive) {
+                addOutputLine(`rm: cannot remove '${target}': Is a directory. Use -r to remove directories.`, "error");
+                return;
+            }
+            
+            // Delete the file or directory
+            delete currentDir[target];
+            addOutputLine(`Removed ${typeof currentDir[target] === "object" ? "directory" : "file"}: ${target}`, "success");
+        }
+        
+        function showWeather(args) {
+            const cities = {
+                "new york": { temp: "72°F", condition: "Partly Cloudy", humidity: "65%" },
+                "london": { temp: "18°C", condition: "Rainy", humidity: "80%" },
+                "tokyo": { temp: "26°C", condition: "Sunny", humidity: "40%" },
+                "paris": { temp: "21°C", condition: "Clear", humidity: "45%" },
+                "sydney": { temp: "24°C", condition: "Windy", humidity: "55%" }
+            };
+            
+            const defaultCity = "new york";
+            const city = args.length > 0 ? args.join(" ").toLowerCase() : defaultCity;
+            
+            if (cities[city]) {
+                const forecast = cities[city];
+                addOutputLine(`Weather for ${city.charAt(0).toUpperCase() + city.slice(1)}:`, "info");
+                addOutputLine(`Temperature: ${forecast.temp}`);
+                addOutputLine(`Condition: ${forecast.condition}`);
+                addOutputLine(`Humidity: ${forecast.humidity}`);
+            } else {
+                addOutputLine(`Weather data not available for '${city}'.`, "error");
+                addOutputLine(`Available cities: ${Object.keys(cities).join(", ")}`);
+            }
+        }
+        
+        function calculator(args) {
+            if (args.length === 0) {
+                addOutputLine("Usage: calc <expression>", "error");
+                addOutputLine("Example: calc 5 + 10");
+                return;
+            }
+            
+            const expression = args.join(" ");
+            try {
+                // Safe evaluation with Function instead of eval
+                const result = Function('"use strict"; return (' + expression + ')')();
+                addOutputLine(`${expression} = ${result}`);
+            } catch (e) {
+                addOutputLine(`Error: ${e.message}`, "error");
+            }
+        }
+        
+        function setTimer(args) {
+            if (args.length === 0) {
+                addOutputLine("Usage: timer <seconds> [message]", "error");
+                return;
+            }
+            
+            const seconds = parseInt(args[0]);
+            if (isNaN(seconds) || seconds <= 0) {
+                addOutputLine("Please provide a positive number of seconds", "error");
+                return;
+            }
+            
+            const message = args.slice(1).join(" ") || "Timer finished!";
+            
+            addOutputLine(`Timer set for ${seconds} seconds.`, "info");
+            
+            // Create progress bar
+            const progressBarContainer = document.createElement("div");
+            progressBarContainer.className = "progress-bar";
+            const progressBar = document.createElement("div");
+            progressBar.className = "progress-bar-fill";
+            progressBar.style.width = "0%";
+            progressBarContainer.appendChild(progressBar);
+            
+            const terminal = document.getElementById("terminal");
+            terminal.appendChild(progressBarContainer);
+            
+            const startTime = Date.now();
+            const endTime = startTime + (seconds * 1000);
+            
+            const interval = setInterval(() => {
+                const now = Date.now();
+                const timeLeft = endTime - now;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    progressBar.style.width = "100%";
+                    showNotification(message);
+                    
+                    // Play sound
+                    const audio = new Audio("https://cdn.jsdelivr.net/gh/freeCodeCamp/cdn@master/build/testable-projects-fcc/audio/BeepSound.wav");
+                    audio.play();
+                    
+                    return;
+                }
+                
+                const progress = 100 - (timeLeft / (seconds * 1000) * 100);
+                progressBar.style.width = `${progress}%`;
+            }, 100);
+        }
+        
+        function todoManager(args) {
+            if (args.length === 0) {
+                // List all todos
+                if (todos.length === 0) {
+                    addOutputLine("No todos yet. Add one with 'todo add <task>'.", "info");
+                    return;
+                }
+                
+                addOutputLine("Todo List:", "info");
+                todos.forEach((todo, index) => {
+                    addOutputLine(`[${index + 1}] ${todo.done ? '✓' : '○'} ${todo.text}`);
+                });
+                return;
+            }
+            
+            const action = args[0];
+            
+            switch (action) {
+                case "add":
+                    if (args.length < 2) {
+                        addOutputLine("Usage: todo add <task description>", "error");
+                        return;
+                    }
+                    const task = args.slice(1).join(" ");
+                    todos.push({ text: task, done: false });
+                    addOutputLine(`Added todo: "${task}"`, "success");
+                    break;
+                    
+                case "done":
+                case "complete":
+                    if (args.length < 2 || isNaN(parseInt(args[1]))) {
+                        addOutputLine("Usage: todo done <number>", "error");
+                        return;
+                    }
+                    
+                    const index = parseInt(args[1]) - 1;
+                    if (index < 0 || index >= todos.length) {
+                        addOutputLine("Invalid todo number", "error");
+                        return;
+                    }
+                    
+                    todos[index].done = true;
+                    addOutputLine(`Marked "${todos[index].text}" as done`, "success");
+                    break;
+                    
+                case "remove":
+                case "delete":
+                    if (args.length < 2 || isNaN(parseInt(args[1]))) {
+                        addOutputLine("Usage: todo remove <number>", "error");
+                        return;
+                    }
+                    
+                    const delIndex = parseInt(args[1]) - 1;
+                    if (delIndex < 0 || delIndex >= todos.length) {
+                        addOutputLine("Invalid todo number", "error");
+                        return;
+                    }
+                    
+                    const removed = todos.splice(delIndex, 1);
+                    addOutputLine(`Removed: "${removed[0].text}"`, "success");
+                    break;
+                    
+                case "clear":
+                    todos = [];
+                    addOutputLine("Todo list cleared", "success");
+                    break;
+                    
+                default:
+                    addOutputLine(`Unknown todo action: ${action}`, "error");
+                    addOutputLine("Available actions: add, done, remove, clear");
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('webcli_todos', JSON.stringify(todos));
+        }
+        
+        function webSearch(args) {
+            if (args.length === 0) {
+                addOutputLine("Usage: search <query>", "error");
+                return;
+            }
+            
+            const query = args.join(" ");
+            addOutputLine(`Searching the web for: "${query}"...`, "info");
+            
+            // Create search results
+            setTimeout(() => {
+                addOutputLine(`<div class="search-results">
+                    <div class="search-result">
+                        <div class="font-bold text-blue-400">What is ${query} - Wikipedia</div>
+                        <div class="text-green-400">https://en.wikipedia.org/wiki/${query.replace(/\s+/g, '_')}</div>
+                        <div>${query} is a term that refers to various concepts depending on context...</div>
+                    </div>
+                    <div class="search-result mt-2">
+                        <div class="font-bold text-blue-400">Understanding ${query} - A Complete Guide</div>
+                        <div class="text-green-400">https://google.com/guide-to-${query.replace(/\s+/g, '-')}</div>
+                        <div>The most comprehensive guide to ${query} with examples and tutorials...</div>
+                    </div>
+                    <div class="search-result mt-2">
+                        <div class="font-bold text-blue-400">${query} - Official Documentation</div>
+                        <div class="text-green-400">https://docs.google.org/${query.replace(/\s+/g, '-')}</div>
+                        <div>Official documentation and reference materials for ${query}...</div>
+                    </div>
+                </div>`);
+                
+                addOutputLine('\nTo visit any of these links in a real terminal, you would use a command like `open <url>`');
+                addNewPrompt();
+            }, 1000);
+        }
+        
+        function playGame(args) {
+            const games = {
+                "guess": playGuessNumber,
+                "rps": playRockPaperScissors,
+                "hangman": playHangman,
+                "adventure": playTextAdventure
+            };
+            
+            if (args.length === 0 || args[0] === "list") {
+                addOutputLine("Available games:", "info");
+                addOutputLine("  guess    - Guess the number");
+                addOutputLine("  rps      - Rock, Paper, Scissors");
+                addOutputLine("  hangman  - Hangman word game");
+                addOutputLine("  adventure - Text adventure");
+                addOutputLine("\nPlay with 'game <name>'");
+                return;
+            }
+            
+            const gameName = args[0].toLowerCase();
+            
+            if (games[gameName]) {
+                games[gameName]();
+            } else {
+                addOutputLine(`Game '${gameName}' not found. Try 'game list' to see available games.`, "error");
+            }
+        }
+        
+        function playGuessNumber() {
+            // Implementation of guess the number game
+            const secretNumber = Math.floor(Math.random() * 100) + 1;
+            let attempts = 0;
+            let gameActive = true;
+            
+            addOutputLine("🎮 GUESS THE NUMBER 🎮", "info");
+            addOutputLine("I'm thinking of a number between 1 and 100.");
+            addOutputLine("Type your guess or 'quit' to exit the game.");
+            
+            // Override the command processor temporarily
+            const originalProcessCommand = processCommand;
+            processCommand = function(command) {
+                if (!gameActive) {
+                    processCommand = originalProcessCommand;
+                    processCommand(command);
+                    return;
+                }
+                
+                const terminal = document.getElementById('terminal');
+                const commandLine = terminal.lastElementChild;
+                const input = commandLine.querySelector('input');
+                
+                // Replace input with plain text
+                const inputText = document.createTextNode(command);
+                input.parentNode.replaceChild(inputText, input);
+                commandLine.querySelector('.cursor').remove();
+                
+                if (command.toLowerCase() === 'quit') {
+                    addOutputLine(`Game over! The number was ${secretNumber}.`);
+                    gameActive = false;
+                    addNewPrompt();
+                    processCommand = originalProcessCommand;
+                    return;
+                }
+                
+                const guess = parseInt(command);
+                
+                if (isNaN(guess)) {
+                    addOutputLine("Please enter a valid number or 'quit'.", "error");
+                } else {
+                    attempts++;
+                    
+                    if (guess < secretNumber) {
+                        addOutputLine(`Too low! Try again.`);
+                    } else if (guess > secretNumber) {
+                        addOutputLine(`Too high! Try again.`);
+                    } else {
+                        addOutputLine(`🎉 Correct! You guessed it in ${attempts} attempts!`, "success");
+                        gameActive = false;
+                        processCommand = originalProcessCommand;
+                    }
+                }
+                
+                addNewPrompt();
+            };
+        }
+        
+        function playRockPaperScissors() {
+            const choices = ['rock', 'paper', 'scissors'];
+            let playerScore = 0;
+            let computerScore = 0;
+            let gameActive = true;
+            
+            addOutputLine("🎮 ROCK PAPER SCISSORS 🎮", "info");
+            addOutputLine("Enter rock, paper, or scissors (or 'quit' to exit).");
+            
+            // Override the command processor temporarily
+            const originalProcessCommand = processCommand;
+            processCommand = function(command) {
+                if (!gameActive) {
+                    processCommand = originalProcessCommand;
+                    processCommand(command);
+                    return;
+                }
+                
+                const terminal = document.getElementById('terminal');
+                const commandLine = terminal.lastElementChild;
+                const input = commandLine.querySelector('input');
+                
+                // Replace input with plain text
+                const inputText = document.createTextNode(command);
+                input.parentNode.replaceChild(inputText, input);
+                commandLine.querySelector('.cursor').remove();
+                
+                const playerChoice = command.toLowerCase();
+                
+                if (playerChoice === 'quit') {
+                    addOutputLine(`Game over! Final score: You ${playerScore} - ${computerScore} Computer`);
+                    gameActive = false;
+                    addNewPrompt();
+                    processCommand = originalProcessCommand;
+                    return;
+                }
+                
+                if (!choices.includes(playerChoice)) {
+                    addOutputLine("Invalid choice! Please enter rock, paper, scissors, or 'quit'.", "error");
+                    addNewPrompt();
+                    return;
+                }
+                
+                const computerChoice = choices[Math.floor(Math.random() * choices.length)];
+                addOutputLine(`You chose ${playerChoice}, computer chose ${computerChoice}.`);
+                
+                if (playerChoice === computerChoice) {
+                    addOutputLine("It's a tie!");
+                } else if (
+                    (playerChoice === 'rock' && computerChoice === 'scissors') ||
+                    (playerChoice === 'paper' && computerChoice === 'rock') ||
+                    (playerChoice === 'scissors' && computerChoice === 'paper')
+                ) {
+                    playerScore++;
+                    addOutputLine("You win this round!", "success");
+                } else {
+                    computerScore++;
+                    addOutputLine("Computer wins this round!");
+                }
+                
+                addOutputLine(`Score: You ${playerScore} - ${computerScore} Computer`);
+                addNewPrompt();
+            };
+        }
+        
+        function playHangman() {
+            const words = ['javascript', 'terminal', 'computer', 'programming', 'interface', 'command', 'developer'];
+            const word = words[Math.floor(Math.random() * words.length)];
+            let guessedLetters = [];
+            let attemptsLeft = 6;
+            let gameActive = true;
+            
+            addOutputLine("🎮 HANGMAN 🎮", "info");
+            addOutputLine("Guess the word by entering one letter at a time.");
+            addOutputLine("Type 'quit' to exit the game.");
+            
+            function displayWord() {
+                let display = "";
+                for (const letter of word) {
+                    if (guessedLetters.includes(letter)) {
+                        display += letter + " ";
+                    } else {
+                        display += "_ ";
+                    }
+                }
+                return display;
+            }
+            
+            function displayHangman(attempts) {
+                const hangmanArt = [
+                    `
+  +---+
+  |   |
+      |
+      |
+      |
+      |
+=========`,
+                    `
+  +---+
+  |   |
+  O   |
+      |
+      |
+      |
+=========`,
+                    `
+  +---+
+  |   |
+  O   |
+  |   |
+      |
+      |
+=========`,
+                    `
+  +---+
+  |   |
+  O   |
+ /|   |
+      |
+      |
+=========`,
+                    `
+  +---+
+  |   |
+  O   |
+ /|\\  |
+      |
+      |
+=========`,
+                    `
+  +---+
+  |   |
+  O   |
+ /|\\  |
+ /    |
+      |
+=========`,
+                    `
+  +---+
+  |   |
+  O   |
+ /|\\  |
+ / \\  |
+      |
+=========`
+                ];
+                
+                return hangmanArt[6 - attempts];
+            }
+            
+            function isWordGuessed() {
+                return word.split('').every(letter => guessedLetters.includes(letter));
+            }
+            
+            function updateGameStatus() {
+                addOutputLine(displayHangman(attemptsLeft));
+                addOutputLine(`Word: ${displayWord()}`);
+                addOutputLine(`Letters guessed: ${guessedLetters.join(', ')}`);
+                addOutputLine(`Attempts left: ${attemptsLeft}`);
+                
+                if (isWordGuessed()) {
+                    addOutputLine(`🎉 You won! The word was "${word}"!`, "success");
+                    gameActive = false;
+                    processCommand = originalProcessCommand;
+                } else if (attemptsLeft <= 0) {
+                    addOutputLine(`Game over! The word was "${word}".`, "error");
+                    gameActive = false;
+                    processCommand = originalProcessCommand;
+                }
+            }
+            
+            updateGameStatus();
+            
+            // Override the command processor temporarily
+            const originalProcessCommand = processCommand;
+            processCommand = function(command) {
+                if (!gameActive) {
+                    processCommand = originalProcessCommand;
+                    processCommand(command);
+                    return;
+                }
+                
+                const terminal = document.getElementById('terminal');
+                const commandLine = terminal.lastElementChild;
+                const input = commandLine.querySelector('input');
+                
+                // Replace input with plain text
+                const inputText = document.createTextNode(command);
+                input.parentNode.replaceChild(inputText, input);
+                commandLine.querySelector('.cursor').remove();
+                
+                const guess = command.toLowerCase();
+                
+                if (guess === 'quit') {
+                    addOutputLine(`Game over! The word was "${word}".`);
+                    gameActive = false;
+                    addNewPrompt();
+                    processCommand = originalProcessCommand;
+                    return;
+                }
+                
+                if (guess.length !== 1 || !guess.match(/[a-z]/i)) {
+                    addOutputLine("Please enter a single letter or 'quit'.", "error");
+                } else if (guessedLetters.includes(guess)) {
+                    addOutputLine(`You already guessed the letter "${guess}".`, "warning");
+                } else {
+                    guessedLetters.push(guess);
+                    
+                    if (word.includes(guess)) {
+                        addOutputLine(`Good guess! The letter "${guess}" is in the word.`, "success");
+                    } else {
+                        attemptsLeft--;
+                        addOutputLine(`Wrong guess! The letter "${guess}" is not in the word.`, "error");
+                    }
+                    
+                    updateGameStatus();
+                }
+                
+                addNewPrompt();
+            };
+        }
+        
+        function playTextAdventure() {
+            // Simple text adventure game
+            const rooms = {
+                start: {
+                    description: "You are in a dark room. There's a door to the north and a window to the east.",
+                    exits: { north: "hallway", east: "window" }
+                },
+                hallway: {
+                    description: "You're in a long hallway. There's a door to the south and a staircase going up.",
+                    exits: { south: "start", up: "attic" }
+                },
+                window: {
+                    description: "You look out the window and see a garden below. The window is locked.",
+                    exits: { west: "start" }
+                },
+                attic: {
+                    description: "The attic is dusty and filled with old furniture. There's a chest in the corner and stairs going down.",
+                    exits: { down: "hallway" }
+                }
+            };
+            
+            let currentRoom = "start";
+            let inventory = [];
+            let gameActive = true;
+            
+            addOutputLine("🎮 TEXT ADVENTURE 🎮", "info");
+            addOutputLine("Commands: north, south, east, west, up, down, look, take [item], inventory, quit");
+            addOutputLine(rooms[currentRoom].description);
+            
+            // Override the command processor temporarily
+            const originalProcessCommand = processCommand;
+            processCommand = function(command) {
+                if (!gameActive) {
+                    processCommand = originalProcessCommand;
+                    processCommand(command);
+                    return;
+                }
+                
+                const terminal = document.getElementById('terminal');
+                const commandLine = terminal.lastElementChild;
+                const input = commandLine.querySelector('input');
+                
+                // Replace input with plain text
+                const inputText = document.createTextNode(command);
+                input.parentNode.replaceChild(inputText, input);
+                commandLine.querySelector('.cursor').remove();
+                
+                const cmd = command.toLowerCase();
+                
+                if (cmd === 'quit') {
+                    addOutputLine("You have left the adventure.");
+                    gameActive = false;
+                    addNewPrompt();
+                    processCommand = originalProcessCommand;
+                    return;
+                } else if (cmd === 'look') {
+                    addOutputLine(rooms[currentRoom].description);
+                } else if (cmd === 'inventory') {
+                    if (inventory.length === 0) {
+                        addOutputLine("Your inventory is empty.");
+                    } else {
+                        addOutputLine("Inventory: " + inventory.join(", "));
+                    }
+                } else if (cmd.startsWith('take ')) {
+                    const item = cmd.substring(5);
+                    if (currentRoom === "attic" && item === "key" && !inventory.includes("key")) {
+                        inventory.push("key");
+                        addOutputLine("You picked up a key.", "success");
+                    } else {
+                        addOutputLine("There's no " + item + " here to take.");
+                    }
+                } else if (rooms[currentRoom].exits[cmd]) {
+                    currentRoom = rooms[currentRoom].exits[cmd];
+                    addOutputLine(rooms[currentRoom].description);
+                } else {
+                    addOutputLine("You can't go that way or that's not a valid command.");
+                }
+                
+                // Special case for the attic
+                if (currentRoom === "attic" && !rooms.attic.visited) {
+                    rooms.attic.visited = true;
+                    addOutputLine("You notice a shiny key on top of the chest.");
+                }
+                
+                addNewPrompt();
+            };
+        }
+        
+        function toggleMatrix() {
+            isMatrixEnabled = !isMatrixEnabled;
+            
+            const canvas = document.getElementById('matrixCanvas');
+            if (isMatrixEnabled) {
+                addOutputLine("Matrix mode enabled", "success");
+                canvas.style.opacity = "0.1";
+            } else {
+                addOutputLine("Matrix mode disabled");
+                canvas.style.opacity = "0";
+            }
+        }
+        
+        function showBanner(args) {
+            let text = args.length > 0 ? args.join(" ") : "WebCLI";
+            
+            // ASCII art generation (simple version)
+            const asciiArt = generateAsciiArt(text);
+            addOutputLine(`<pre class="welcome-ascii">${asciiArt}</pre>`);
+        }
+        
+        function generateAsciiArt(text) {
+            // Simple ASCII art generator
+            const chars = {
+                'A': [' AAA ', 'A   A', 'AAAAA', 'A   A', 'A   A'],
+                'B': ['BBBB ', 'B   B', 'BBBB ', 'B   B', 'BBBB '],
+                'C': [' CCC ', 'C   C', 'C    ', 'C   C', ' CCC '],
+                'D': ['DDDD ', 'D   D', 'D   D', 'D   D', 'DDDD '],
+                'E': ['EEEEE', 'E    ', 'EEE  ', 'E    ', 'EEEEE'],
+                'F': ['FFFFF', 'F    ', 'FFF  ', 'F    ', 'F    '],
+                'G': [' GGG ', 'G    ', 'G GGG', 'G   G', ' GGG '],
+                'H': ['H   H', 'H   H', 'HHHHH', 'H   H', 'H   H'],
+                'I': ['IIIII', '  I  ', '  I  ', '  I  ', 'IIIII'],
+                'J': ['JJJJJ', '    J', '    J', 'J   J', ' JJJ '],
+                'K': ['K   K', 'K  K ', 'KKK  ', 'K  K ', 'K   K'],
+                'L': ['L    ', 'L    ', 'L    ', 'L    ', 'LLLLL'],
+                'M': ['M   M', 'MM MM', 'M M M', 'M   M', 'M   M'],
+                'N': ['N   N', 'NN  N', 'N N N', 'N  NN', 'N   N'],
+                'O': [' OOO ', 'O   O', 'O   O', 'O   O', ' OOO '],
+                'P': ['PPPP ', 'P   P', 'PPPP ', 'P    ', 'P    '],
+                'Q': [' QQQ ', 'Q   Q', 'Q   Q', 'Q  QQ', ' QQQQ'],
+                'R': ['RRRR ', 'R   R', 'RRRR ', 'R R  ', 'R  RR'],
+                'S': [' SSS ', 'S    ', ' SSS ', '    S', 'SSSS '],
+                'T': ['TTTTT', '  T  ', '  T  ', '  T  ', '  T  '],
+                'U': ['U   U', 'U   U', 'U   U', 'U   U', ' UUU '],
+                'V': ['V   V', 'V   V', 'V   V', ' V V ', '  V  '],
+                'W': ['W   W', 'W   W', 'W W W', 'WW WW', 'W   W'],
+                'X': ['X   X', ' X X ', '  X  ', ' X X ', 'X   X'],
+                'Y': ['Y   Y', ' Y Y ', '  Y  ', '  Y  ', '  Y  '],
+                'Z': ['ZZZZZ', '   Z ', '  Z  ', ' Z   ', 'ZZZZZ'],
+                '0': [' 000 ', '0   0', '0   0', '0   0', ' 000 '],
+                '1': ['  1  ', ' 11  ', '  1  ', '  1  ', '11111'],
+                '2': [' 222 ', '2   2', '   2 ', '  2  ', '22222'],
+                '3': ['3333 ', '    3', '  33 ', '    3', '3333 '],
+                '4': ['   4 ', '  44 ', ' 4 4 ', '44444', '   4 '],
+                '5': ['55555', '5    ', '5555 ', '    5', '5555 '],
+                '6': [' 666 ', '6    ', '6666 ', '6   6', ' 666 '],
+                '7': ['77777', '   7 ', '  7  ', ' 7   ', '7    '],
+                '8': [' 888 ', '8   8', ' 888 ', '8   8', ' 888 '],
+                '9': [' 999 ', '9   9', ' 9999', '    9', ' 999 '],
+                ' ': ['     ', '     ', '     ', '     ', '     ']
+            };
+            
+            // Convert text to uppercase
+            text = text.toUpperCase();
+            
+            // Create the ASCII art
+            let result = ['', '', '', '', ''];
+            
+            for (const char of text) {
+                const c = chars[char] || chars[' '];
+                for (let i = 0; i < 5; i++) {
+                    result[i] += c[i] + ' ';
+                }
+            }
+            
+            return result.join('\n');
+        }
+        
+        function changeTheme(args) {
+            const themes = {
+                catppuccin: {
+                    bg: '#1e1e2e',
+                    text: '#cdd6f4',
+                    prompt: '#a6e3a1',
+                    accent: '#f38ba8',
+                    success: '#89b4fa',
+                    error: '#f38ba8',
+                    warning: '#fab387',
+                    info: '#89dceb'
+                },
+                nord: {
+                    bg: '#2E3440',
+                    text: '#D8DEE9',
+                    prompt: '#88C0D0',
+                    accent: '#81A1C1',
+                    success: '#A3BE8C',
+                    error: '#BF616A',
+                    warning: '#EBCB8B',
+                    info: '#5E81AC'
+                },
+                tokyonight: {
+                    bg: '#24283b',
+                    text: '#c0caf5',
+                    prompt: '#9ece6a',
+                    accent: '#bb9af7',
+                    success: '#7aa2f7',
+                    error: '#f7768e',
+                    warning: '#e0af68',
+                    info: '#7dcfff'
+                },
+                material: {
+                    bg: '#0f111a',
+                    text: '#eeffff',
+                    prompt: '#c3e88d',
+                    accent: '#c792ea',
+                    success: '#82aaff',
+                    error: '#f07178',
+                    warning: '#ffcb6b',
+                    info: '#89ddff'
+                },
+                dracula: {
+                    bg: '#282a36',
+                    text: '#f8f8f2',
+                    prompt: '#50fa7b',
+                    accent: '#ff79c6',
+                    success: '#8be9fd',
+                    error: '#ff5555',
+                    warning: '#ffb86c',
+                    info: '#bd93f9'
+                },
+                palenight: {
+                    bg: '#292d3e',
+                    text: '#a6accd',
+                    prompt: '#c3e88d',
+                    accent: '#c792ea',
+                    success: '#82aaff',
+                    error: '#f07178',
+                    warning: '#ffcb6b',
+                    info: '#89ddff'
+                }
+            };
+            
+            if (args.length === 0 || args[0] === 'list') {
+                addOutputLine("Available themes:", "info");
+                for (const themeName of Object.keys(themes)) {
+                    addOutputLine(`  ${themeName}`);
+                }
+                return;
+            }
+            
+            const themeName = args[0].toLowerCase();
+            if (themes[themeName]) {
+                loadTheme(themeName);
+                addOutputLine(`Theme changed to ${themeName}`, "success");
+                localStorage.setItem('webcli_theme', themeName);
+            } else {
+                addOutputLine(`Theme '${themeName}' not found. Use 'theme list' to see available themes.`, "error");
+            }
+        }
+        
+        function loadTheme(themeName) {
+            const themes = {
+                catppuccin: {
+                    bg: '#1e1e2e',
+                    text: '#cdd6f4',
+                    prompt: '#a6e3a1',
+                    accent: '#f38ba8',
+                    success: '#89b4fa',
+                    error: '#f38ba8',
+                    warning: '#fab387',
+                    info: '#89dceb'
+                },
+                nord: {
+                    bg: '#2E3440',
+                    text: '#D8DEE9',
+                    prompt: '#88C0D0',
+                    accent: '#81A1C1',
+                    success: '#A3BE8C',
+                    error: '#BF616A',
+                    warning: '#EBCB8B',
+                    info: '#5E81AC'
+                },
+                tokyonight: {
+                    bg: '#24283b',
+                    text: '#c0caf5',
+                    prompt: '#9ece6a',
+                    accent: '#bb9af7',
+                    success: '#7aa2f7',
+                    error: '#f7768e',
+                    warning: '#e0af68',
+                    info: '#7dcfff'
+                },
+                material: {
+                    bg: '#0f111a',
+                    text: '#eeffff',
+                    prompt: '#c3e88d',
+                    accent: '#c792ea',
+                    success: '#82aaff',
+                    error: '#f07178',
+                    warning: '#ffcb6b',
+                    info: '#89ddff'
+                },
+                dracula: {
+                    bg: '#282a36',
+                    text: '#f8f8f2',
+                    prompt: '#50fa7b',
+                    accent: '#ff79c6',
+                    success: '#8be9fd',
+                    error: '#ff5555',
+                    warning: '#ffb86c',
+                    info: '#bd93f9'
+                },
+                palenight: {
+                    bg: '#292d3e',
+                    text: '#a6accd',
+                    prompt: '#c3e88d',
+                    accent: '#c792ea',
+                    success: '#82aaff',
+                    error: '#f07178',
+                    warning: '#ffcb6b',
+                    info: '#89ddff'
+                }
+            };
+            
+            const theme = themes[themeName] || themes.catppuccin;
+            currentTheme = themeName;
+            
+            document.documentElement.style.setProperty('--bg-color', theme.bg);
+            document.documentElement.style.setProperty('--text-color', theme.text);
+            document.documentElement.style.setProperty('--prompt-color', theme.prompt);
+            document.documentElement.style.setProperty('--accent-color', theme.accent);
+            document.documentElement.style.setProperty('--success-color', theme.success);
+            document.documentElement.style.setProperty('--error-color', theme.error);
+            document.documentElement.style.setProperty('--warning-color', theme.warning);
+            document.documentElement.style.setProperty('--info-color', theme.info);
+            
+            // Update active theme in the UI
+            const themeOptions = document.querySelectorAll('.theme-option');
+            themeOptions.forEach(option => {
+                option.classList.remove('active');
+                if (option.dataset.theme === themeName) {
+                    option.classList.add('active');
+                }
+            });
+        }
+        
+        function showHistory() {
+            if (commandHistory.length === 0) {
+                addOutputLine("No command history yet.");
+                return;
+            }
+            
+            addOutputLine("Command History:", "info");
+            commandHistory.forEach((cmd, index) => {
+                addOutputLine(`${index + 1}: ${cmd}`);
+            });
+        }
+        
+        function manageAlias(args) {
+            if (args.length === 0 || args[0] === 'list') {
+                if (Object.keys(aliases).length === 0) {
+                    addOutputLine("No aliases defined yet.");
+                    return;
+                }
+                
+                addOutputLine("Defined aliases:", "info");
+                for (const [alias, command] of Object.entries(aliases)) {
+                    addOutputLine(`  ${alias} = '${command}'`);
+                }
+                return;
+            }
+            
+            if (args[0] === 'set' && args.length >= 3) {
+                const aliasName = args[1];
+                const aliasCommand = args.slice(2).join(' ');
+                
+                aliases[aliasName] = aliasCommand;
+                addOutputLine(`Alias set: ${aliasName} = '${aliasCommand}'`, "success");
+                localStorage.setItem('webcli_aliases', JSON.stringify(aliases));
+                return;
+            }
+            
+            if (args[0] === 'remove' && args.length >= 2) {
+                const aliasName = args[1];
+                
+                if (aliases[aliasName]) {
+                    delete aliases[aliasName];
+                    addOutputLine(`Alias '${aliasName}' removed.`, "success");
+                    localStorage.setItem('webcli_aliases', JSON.stringify(aliases));
+                } else {
+                    addOutputLine(`Alias '${aliasName}' not found.`, "error");
+                }
+                return;
+            }
+            
+            addOutputLine("Usage: alias [list|set|remove]", "error");
+            addOutputLine("  alias list");
+            addOutputLine("  alias set <name> <command>");
+            addOutputLine("  alias remove <name>");
+        }
+        
+        function showIpInfo() {
+            // Simulated IP info
+            addOutputLine("IP Information:", "info");
+            addOutputLine("IP Address: 192.168.1.100");
+            addOutputLine("Hostname: webcli-host");
+            addOutputLine("MAC Address: 00:1A:2B:3C:4D:5E");
+            addOutputLine("Gateway: 192.168.1.1");
+            addOutputLine("DNS Servers: 8.8.8.8, 8.8.4.4");
+            
+            addOutputLine("\nNetwork Interfaces:", "info");
+            addOutputLine("eth0: Connected");
+            addOutputLine("wlan0: Disconnected");
+        }
+        
+        function showFortune() {
+            const fortunes = [
+                "Success is not final, failure is not fatal: it is the courage to continue that counts.",
+                "It always seems impossible until it's done.",
+                "The best way to predict the future is to create it.",
+                "The only way to do great work is to love what you do.",
+                "In the middle of difficulty lies opportunity.",
+                "The future belongs to those who believe in the beauty of their dreams.",
+                "The secret of getting ahead is getting started.",
+                "Don't count the days, make the days count.",
+                "Believe you can and you're halfway there.",
+                "Your time is limited, don't waste it living someone else's life.",
+                "I have not failed. I've just found 10,000 ways that won't work.",
+                "If you want to lift yourself up, lift up someone else.",
+                "The only limit to our realization of tomorrow is our doubts of today.",
+                "You miss 100% of the shots you don't take.",
+                "Life is what happens when you're busy making other plans."
+            ];
+            
+            const randomIndex = Math.floor(Math.random() * fortunes.length);
+            addOutputLine(`"${fortunes[randomIndex]}"`, "info");
+        }
+        
+        function showSystemInfo() {
+            addOutputLine("System Information", "info");
+            addOutputLine("------------------");
+            addOutputLine("OS: WebCLI OS v1.0.0");
+            addOutputLine("Kernel: Browser " + navigator.userAgent);
+            addOutputLine("Uptime: " + getRandomUptime());
+            addOutputLine("Shell: WebCLI Shell 1.0.0");
+            addOutputLine("CPU: Browser JavaScript Engine");
+            addOutputLine("Memory: " + Math.floor(Math.random() * 8 + 4) + "GB / 16GB");
+            addOutputLine("Resolution: " + window.innerWidth + "x" + window.innerHeight);
+            addOutputLine("Terminal: WebCLI Terminal v1.0.0");
+            addOutputLine("Theme: " + currentTheme);
+            addOutputLine("User: " + username);
+        }
+        
+        function getRandomUptime() {
+            const hours = Math.floor(Math.random() * 24);
+            const minutes = Math.floor(Math.random() * 60);
+            const seconds = Math.floor(Math.random() * 60);
+            return `${hours} hours, ${minutes} minutes, ${seconds} seconds`;
+        }
+        
+        function showManual(args) {
+            if (args.length === 0) {
+                addOutputLine("Usage: man <command>", "error");
+                return;
+            }
+            
+            const commandName = args[0];
+            if (!commands[commandName]) {
+                addOutputLine(`No manual entry for '${commandName}'`, "error");
+                return;
+            }
+            
+            const manuals = {
+                help: {
+                    name: "help",
+                    synopsis: "help [command]",
+                    description: "Display help information about available commands. If a command is specified, show detailed help for that command.",
+                    examples: [
+                        "help",
+                        "help ls"
+                    ]
+                },
+                clear: {
+                    name: "clear",
+                    synopsis: "clear",
+                    description: "Clear the terminal screen.",
+                    examples: [
+                        "clear"
+                    ]
+                },
+                echo: {
+                    name: "echo",
+                    synopsis: "echo [text...]",
+                    description: "Display a line of text. Multiple arguments are displayed with spaces between them.",
+                    examples: [
+                        "echo Hello World",
+                        "echo The time is $(date)"
+                    ]
+                },
+                whoami: {
+                    name: "whoami",
+                    synopsis: "whoami",
+                    description: "Display the current username.",
+                    examples: [
+                        "whoami"
+                    ]
+                },
+                date: {
+                    name: "date",
+                    synopsis: "date",
+                    description: "Display the current date and time.",
+                    examples: [
+                        "date"
+                    ]
+                },
+                ls: {
+                    name: "ls",
+                    synopsis: "ls [-a] [-l] [directory]",
+                    description: "List directory contents.\n  -a  Include hidden entries\n  -l  Use long listing format",
+                    examples: [
+                        "ls",
+                        "ls -l",
+                        "ls -a documents"
+                    ]
+                },
+                cat: {
+                    name: "cat",
+                    synopsis: "cat <file>",
+                    description: "Concatenate files and print on the standard output.",
+                    examples: [
+                        "cat README.txt"
+                    ]
+                },
+                touch: {
+                    name: "touch",
+                    synopsis: "touch <file>",
+                    description: "Create a new empty file or update the timestamp of an existing file.",
+                    examples: [
+                        "touch newfile.txt"
+                    ]
+                },
+                mkdir: {
+                    name: "mkdir",
+                    synopsis: "mkdir <directory>",
+                    description: "Create a new directory.",
+                    examples: [
+                        "mkdir projects"
+                    ]
+                },
+                cd: {
+                    name: "cd",
+                    synopsis: "cd [directory]",
+                    description: "Change the current working directory. If no directory is specified, changes to the home directory (~).",
+                    examples: [
+                        "cd",
+                        "cd documents",
+                        "cd ..",
+                        "cd /path/to/directory"
+                    ]
+                },
+                pwd: {
+                    name: "pwd",
+                    synopsis: "pwd",
+                    description: "Print the current working directory.",
+                    examples: [
+                        "pwd"
+                    ]
+                },
+                rm: {
+                    name: "rm",
+                    synopsis: "rm [-r] <file|directory>",
+                    description: "Remove files or directories.\n  -r  Remove directories and their contents recursively",
+                    examples: [
+                        "rm file.txt",
+                        "rm -r directory"
+                    ]
+                },
+                weather: {
+                    name: "weather",
+                    synopsis: "weather [city]",
+                    description: "Display weather information for the specified city. If no city is specified, shows weather for New York.",
+                    examples: [
+                        "weather",
+                        "weather London",
+                        "weather Tokyo"
+                    ]
+                },
+                calc: {
+                    name: "calc",
+                    synopsis: "calc <expression>",
+                    description: "Simple calculator that evaluates mathematical expressions.",
+                    examples: [
+                        "calc 5 + 10",
+                        "calc (15 * 3) / 2"
+                    ]
+                },
+                timer: {
+                    name: "timer",
+                    synopsis: "timer <seconds> [message]",
+                    description: "Set a countdown timer with an optional message to display when finished.",
+                    examples: [
+                        "timer 30",
+                        "timer 60 Break time is over!"
+                    ]
+                },
+                todo: {
+                    name: "todo",
+                    synopsis: "todo [add|done|remove|clear] [args...]",
+                    description: "Todo list manager.\n  add <text>    Add a new todo item\n  done <number>  Mark a todo as completed\n  remove <number>  Remove a todo item\n  clear         Clear all todos",
+                    examples: [
+                        "todo",
+                        "todo add Buy groceries",
+                        "todo done 1",
+                        "todo remove 2",
+                        "todo clear"
+                    ]
+                },
+                login: {
+                    name: "login",
+                    synopsis: "login <username>",
+                    description: "Set the current username.",
+                    examples: [
+                        "login alice"
+                    ]
+                },
+                nano: {
+    name: "nano",
+    synopsis: "nano <filename>",
+    description: "Text editor for creating and editing files in the terminal.",
+    examples: [
+        "nano myfile.txt",
+        "nano script.js"
+    ]
+},
+
+                game: {
+                    name: "game",
+                    synopsis: "game [name]",
+                    description: "Play a simple game.\n  list      Show available games\n  guess     Number guessing game\n  rps       Rock, Paper, Scissors\n  hangman   Word guessing game\n  adventure Text adventure",
+                    examples: [
+                        "game list",
+                        "game guess",
+                        "game rps"
+                    ]
+                }
+            };
+            
+            const manual = manuals[commandName] || {
+                name: commandName,
+                synopsis: commandName,
+                description: commands[commandName].desc,
+                examples: [commandName]
+            };
+            
+            addOutputLine(`NAME`, "info");
+            addOutputLine(`    ${manual.name} - ${commands[commandName].desc}`);
+            addOutputLine(`\nSYNOPSIS`, "info");
+            addOutputLine(`    ${manual.synopsis}`);
+            addOutputLine(`\nDESCRIPTION`, "info");
+            addOutputLine(`    ${manual.description}`);
+            addOutputLine(`\nEXAMPLES`, "info");
+            manual.examples.forEach(example => {
+                addOutputLine(`    ${example}`);
+            });
+        }
+        
+        function showFetch() {
+            const logos = {
+                default: [
+                    "    __          __  _      ____ _     ___",
+                    "    \\ \\        / / | |    / ___| |   |_ _|",
+                    "     \\ \\  /\\  / /__| |__ | |   | |    | |",
+                    "      \\ \\/  \\/ / _ \\ '_ \\| |___| |___ | |",
+                    "       \\  /\\  /  __/ |_) |\\____|_____|___|",
+                    "        \\/  \\/ \\___|_.__/|_______|        "
+                ]
+            };
+            
+            const logo = logos.default;
+            const info = [
+                `<span class="info">OS</span>: WebCLI OS v1.0.0`,
+                `<span class="info">Host</span>: WebBrowser`,
+                `<span class="info">Kernel</span>: JavaScript`,
+                `<span class="info">Uptime</span>: ${getRandomUptime()}`,
+                `<span class="info">Shell</span>: WebCLI Shell`,
+                `<span class="info">Terminal</span>: ${navigator.userAgent.includes("Mozilla") ? "Firefox" : "Chrome"}`,
+                `<span class="info">CPU</span>: WebBrowser JS Engine`,
+                `<span class="info">Memory</span>: ${Math.floor(Math.random() * 8 + 4)}GB / 16GB`,
+                `<span class="info">User</span>: ${username}@webcli`,
+                `<span class="info">Theme</span>: ${currentTheme}`,
+                `<span class="success">●</span><span class="error">●</span><span class="warning">●</span><span class="info">●</span><span class="prompt">●</span><span class="accent">●</span>`
+            ];
+            
+            // Build the output with logo and info side by side
+            let result = "";
+            for (let i = 0; i < Math.max(logo.length, info.length); i++) {
+                const logoLine = i < logo.length ? `<span class="accent">${logo[i]}</span>` : "";
+                const infoLine = i < info.length ? info[i] : "";
+                
+                // Add padding between logo and info
+                result += `${logoLine}${" ".repeat(4)}${infoLine}\n`;
+            }
+            
+            addOutputLine(`<pre>${result}</pre>`);
+        }
+        
+        function login(args) {
+            if (args.length === 0) {
+                addOutputLine("Usage: login <username>", "error");
+                return;
+            }
+            
+            const newUsername = args.join(" ");
+            username = newUsername;
+            addOutputLine(`Logged in as ${username}`, "success");
+            localStorage.setItem('webcli_username', username);
+        }
+        
+        function logout() {
+            username = "guest";
+            addOutputLine("Logged out. Now using guest account.", "success");
+            localStorage.removeItem('webcli_username');
+        }
+        
+        function nanoEditor(args) {
+    if (args.length === 0) {
+        addOutputLine("Usage: nano <filename>", "error");
+        return;
+    }
+    
+    const filename = args[0];
+    const currentDir = getCurrentDirObject();
+    
+    // Check if we are trying to edit a directory
+    if (currentDir[filename] && typeof currentDir[filename] === 'object') {
+        addOutputLine(`nano: ${filename}: Is a directory`, "error");
+        return;
+    }
+    
+    // Get initial content if file exists, or empty string for new file
+    let fileContent = currentDir[filename] || "";
+    let isNewFile = !currentDir[filename];
+    
+    // Clear terminal for editor
+    const terminal = document.getElementById('terminal');
+    terminal.innerHTML = '';
+    
+    // Create editor interface
+    const editorContainer = document.createElement('div');
+    editorContainer.className = 'nano-editor';
+    editorContainer.style.height = '90%';
+    editorContainer.style.width = '100%';
+    editorContainer.style.display = 'flex';
+    editorContainer.style.flexDirection = 'column';
+    
+    // Create editor textarea
+    const editor = document.createElement('textarea');
+    editor.className = 'editor-area';
+    editor.style.flex = '1';
+    editor.style.width = '100%';
+    editor.style.backgroundColor = 'var(--bg-color)';
+    editor.style.color = 'var(--text-color)';
+    editor.style.border = 'none';
+    editor.style.outline = 'none';
+    editor.style.resize = 'none';
+    editor.style.fontFamily = "'Fira Code', monospace";
+    editor.style.padding = '10px';
+    editor.value = fileContent;
+    editor.spellcheck = false;
+    
+    // Create status bar
+    const statusBar = document.createElement('div');
+    statusBar.className = 'status-bar';
+    statusBar.style.padding = '4px 10px';
+    statusBar.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+    statusBar.style.fontSize = '14px';
+    statusBar.innerHTML = `
+        <div style="display: flex; justify-content: space-between;">
+            <div>
+                <span class="info">^O</span> Write Out | 
+                <span class="info">^X</span> Exit
+            </div>
+            <div>
+                Editing: <span class="success">${filename}</span> ${isNewFile ? '(New File)' : ''}
+            </div>
+        </div>
+    `;
+    
+    // Add elements to container
+    editorContainer.appendChild(editor);
+    editorContainer.appendChild(statusBar);
+    terminal.appendChild(editorContainer);
+    
+    // Focus the editor
+    editor.focus();
+    
+    // Handle keyboard shortcuts
+    editor.addEventListener('keydown', function(e) {
+        // Ctrl+O: Save
+        if (e.key === 'o' && e.ctrlKey) {
+            e.preventDefault();
+            
+            // Save file content
+            currentDir[filename] = editor.value;
+            
+            // Show save notification in status bar
+            statusBar.innerHTML = `
+                <div style="display: flex; justify-content: space-between;">
+                    <div class="success">
+                        File saved
+                    </div>
+                    <div>
+                        Saved: <span class="success">${filename}</span>
+                    </div>
+                </div>
+            `;
+            
+            // Reset status bar after a delay
+            setTimeout(() => {
+                statusBar.innerHTML = `
+                    <div style="display: flex; justify-content: space-between;">
+                        <div>
+                            <span class="info">^O</span> Write Out | 
+                            <span class="info">^X</span> Exit
+                        </div>
+                        <div>
+                            Editing: <span class="success">${filename}</span>
+                        </div>
+                    </div>
+                `;
+            }, 1500);
+        }
+        
+        // Ctrl+X: Exit
+        if (e.key === 'x' && e.ctrlKey) {
+            e.preventDefault();
+            
+            // Ask for confirmation if changes aren't saved
+            if (currentDir[filename] !== editor.value) {
+                statusBar.innerHTML = `
+                    <div style="display: flex; justify-content: space-between;">
+                        <div class="warning">
+                            Save modified buffer? (Answering "No" will discard changes)
+                            <span class="info">Y</span> Yes | 
+                            <span class="info">N</span> No
+                        </div>
+                    </div>
+                `;
+                
+                // Handle Y/N response
+                const handleSaveResponse = function(e) {
+                    if (e.key.toLowerCase() === 'y') {
+                        currentDir[filename] = editor.value;
+                        exitEditor();
+                    } else if (e.key.toLowerCase() === 'n') {
+                        exitEditor();
+                    }
+                    
+                    editor.removeEventListener('keydown', handleSaveResponse);
+                };
+                
+                editor.addEventListener('keydown', handleSaveResponse);
+            } else {
+                exitEditor();
+            }
+        }
+    });
+    
+    function exitEditor() {
+        // Clear terminal and restore normal operation
+        terminal.innerHTML = '';
+        
+        // Show exit message
+        addOutputLine(`File ${isNewFile ? 'created' : 'edited'}: ${filename}`, "success");
+        
+        // Add new prompt
+        addNewPrompt();
+    }
+}
+
+        // Helper functions
+        function addOutputLine(text, className = "") {
+            const terminal = document.getElementById('terminal');
+            const output = document.createElement('div');
+            output.className = `output-line ${className}`;
+            output.innerHTML = text;
+            terminal.appendChild(output);
+            
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+        
+        function getCurrentDirObject() {
+            if (currentDirectory === "~") {
+                return fileSystem["~"];
+            }
+            
+            const parts = currentDirectory.split("/").filter(p => p && p !== "~");
+            let current = fileSystem["~"];
+            
+            for (const part of parts) {
+                current = current[part];
+                if (!current || typeof current !== "object") {
+                    return null;
+                }
+            }
+            
+            return current;
+        }
+        
+        function navigatePath(startObj, pathParts) {
+            let current = startObj;
+            
+            for (const part of pathParts) {
+                if (part === "..") {
+                    // Not implemented for this simplified version
+                    return null;
+                }
+                
+                if (!current[part]) {
+                    return null;
+                }
+                
+                if (typeof current[part] !== "object") {
+                    return null;
+                }
+                
+                current = current[part];
+            }
+            
+            return current;
+        }
+        
+        function navigateHistory(direction) {
+            if (commandHistory.length === 0) return;
+            
+            const input = document.querySelector('.command-input');
+            
+            if (direction === 'up') {
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    input.value = commandHistory[historyIndex];
+                }
+            } else if (direction === 'down') {
+                if (historyIndex < commandHistory.length - 1) {
+                    historyIndex++;
+                    input.value = commandHistory[historyIndex];
+                } else {
+                    historyIndex = commandHistory.length;
+                    input.value = '';
+                }
+            }
+        }
+        
+        function focusOnInput() {
+            const input = document.querySelector('.command-input');
+            if (input) {
+                input.focus();
+            }
+        }
+        
+        function autocompleteCommand() {
+            const input = document.querySelector('.command-input');
+            const inputValue = input.value;
+            
+            // Split by space to get the command and current word
+            const parts = inputValue.split(' ');
+            const currentWord = parts[parts.length - 1];
+            
+            if (parts.length === 1) {
+                // Autocomplete command name
+                const matches = Object.keys(commands).filter(cmd => cmd.startsWith(currentWord));
+                
+                if (matches.length === 1) {
+                    input.value = matches[0] + ' ';
+                } else if (matches.length > 1) {
+                    addOutputLine("\nPossible commands:", "info");
+                    addOutputLine(matches.join('  '));
+                    addNewPrompt();
+                    input.value = currentWord;
+                }
+            } else if (parts[0] === 'cd' || parts[0] === 'ls' || parts[0] === 'cat') {
+                // Autocomplete filenames and directories
+                const currentDir = getCurrentDirObject();
+                const matches = Object.keys(currentDir).filter(name => name.startsWith(currentWord));
+                
+                if (matches.length === 1) {
+                    parts[parts.length - 1] = matches[0];
+                    input.value = parts.join(' ');
+                    
+                    // Add trailing slash for directories
+                    if (typeof currentDir[matches[0]] === 'object') {
+                        input.value += '/';
+                    }
+                } else if (matches.length > 1) {
+                    addOutputLine("\nPossible completions:", "info");
+                    addOutputLine(matches.join('  '));
+                    addNewPrompt();
+                    input.value = inputValue;
+                }
+            }
+        }
+        
+        function toggleHelp() {
+            showHelp([]);
+        }
+        
+        function toggleThemes() {
+            const themeMenu = document.getElementById('themeMenu');
+            themeMenu.classList.toggle('hidden');
+        }
+        
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    addOutputLine('Error attempting to enable fullscreen: ' + err.message, 'error');
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+        
+        function downloadHistory() {
+            const historyText = commandHistory.join('\n');
+            const blob = new Blob([historyText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'webcli_history.txt';
+            a.click();
+            
+            URL.revokeObjectURL(url);
+            showNotification('History exported successfully!');
+        }
+        
+        function showNotification(message) {
+            const notifications = document.getElementById('notifications');
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.innerText = message;
+            
+            notifications.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        function initMatrixEffect() {
+            const canvas = document.getElementById('matrixCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Make canvas fill the screen
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            // Characters to display
+            const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$+-*/=%\"'#&_(),.;:?!\\|{}<>[]^~";
+            const charArr = chars.split('');
+            
+            // Font size and columns
+            const fontSize = 16;
+            const columns = canvas.width / fontSize;
+            
+            // Array for drops - one per column
+            const drops = [];
+            
+            // Initialize all drops
+            for (let i = 0; i < columns; i++) {
+                drops[i] = Math.floor(Math.random() * canvas.height / fontSize);
+            }
+            
+            function draw() {
+                // Black, semi-transparent background
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#0f0'; // Green text
+                ctx.font = fontSize + 'px monospace';
+                
+                // Draw characters
+                for (let i = 0; i < drops.length; i++) {
+                    // Random character
+                    const text = charArr[Math.floor(Math.random() * charArr.length)];
+                    
+                    // x = i*fontSize, y = value of drops[i]*fontSize
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    
+                    // Randomly reset the drop back to the top
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    
+                    // Move the drop down
+                    drops[i]++;
+                }
+                
+                if (isMatrixEnabled) {
+                    requestAnimationFrame(draw);
+                }
+            }
+            
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                
+                // Recalculate columns and drops
+                const newColumns = canvas.width / fontSize;
+                const newDrops = [];
+                
+                for (let i = 0; i < newColumns; i++) {
+                    if (i < drops.length) {
+                        newDrops[i] = drops[i];
+                    } else {
+                        newDrops[i] = Math.floor(Math.random() * canvas.height / fontSize);
+                    }
+                }
+                
+                drops.length = 0;
+                drops.push(...newDrops);
+            });
+            
+            // Start animation if matrix is enabled
+            if (isMatrixEnabled) {
+                requestAnimationFrame(draw);
+            }
+        }
+        
+        // Theme switcher logic
+        document.querySelectorAll('.theme-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const theme = option.dataset.theme;
+                loadTheme(theme);
+                localStorage.setItem('webcli_theme', theme);
+                showNotification(`Theme changed to ${theme}`);
+                document.getElementById('themeMenu').classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+</html>
